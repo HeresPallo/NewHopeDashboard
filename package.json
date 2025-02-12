@@ -2,6 +2,7 @@
     "name": "people-first-dashboard",
     "private": true,
     "version": "0.0.0",
+    "type": "module",
     "scripts": {
         "dev": "vite",
         "build": "vite build",
@@ -11,6 +12,7 @@
     "dependencies": {
         "@emailjs/browser": "^4.4.1",
         "@hookform/resolvers": "^4.0.0",
+        "@tailwindcss/vite": "^4.0.6",
         "@vitejs/plugin-vue": "^5.2.1",
         "axios": "^1.7.7",
         "chart.js": "^4.4.7",

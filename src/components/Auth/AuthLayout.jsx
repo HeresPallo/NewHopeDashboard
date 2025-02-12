@@ -1,3 +1,5 @@
+import React from 'react';
+
 const AuthLayout = ({ children }) => {
     return (
       <div className="min-h-screen flex lg:flex-row bg-gradient-to-br from-red-600 to-red-500 text-white p-6">
