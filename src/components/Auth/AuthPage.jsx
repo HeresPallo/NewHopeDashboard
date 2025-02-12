@@ -20,7 +20,8 @@ const AuthPage = ({ type }) => {
         e.preventDefault();
         try {
             const endpoint = type === "register" ? "/register" : "/login";
-            const response = await axios.post(`http://localhost:5001${endpoint}`, formData);
+            const response = await axios.post(`https://new-hope-e46616a5d911.herokuapp.com${endpoint}`, formData);
+
     
             if (type === "login") {
                 localStorage.setItem("token", response.data.token);
