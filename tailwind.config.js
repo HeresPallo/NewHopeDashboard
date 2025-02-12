@@ -1,6 +1,11 @@
-// ES module syntax
+// tailwind.config.mjs (ES Module)
 export default {
-  content: ['./src/**/*.{js,jsx,ts,tsx}'],
-  theme: { extend: {} },
+  content: [
+    "./index.html",
+    "./src/**/*.{js,ts,jsx,tsx,vue}"
+  ],
+  theme: {
+    extend: {},
+  },
   plugins: [],
 };
