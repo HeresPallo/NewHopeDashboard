@@ -1,0 +1,14 @@
+{
+    "builds": [
+      {
+        "src": "src/index.html",
+        "use": "@vercel/static",
+        "env": {
+      "TAILWIND_CONFIG": "./src/tailwind.config.js"
+    }
+      }
+      
+    ],
+    "outputDirectory": "dist"
+  }
+  
