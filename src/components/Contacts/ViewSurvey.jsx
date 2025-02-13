@@ -44,7 +44,7 @@ const ViewSurvey = () => {
 
     return (
         <div className="max-w-4xl mx-auto p-6 bg-white shadow-md rounded-lg mt-6">
-        <button onClick={() => navigate("/fundraiser")} className="text-blue-500 hover:underline mb-4">
+        <button onClick={() => navigate("/contactsdashboard")} className="text-blue-500 hover:underline mb-4">
         ← Back
       </button>
             <h2 className="text-2xl font-semibold">{survey.title}</h2>
