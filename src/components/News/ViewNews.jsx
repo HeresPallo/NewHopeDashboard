@@ -64,10 +64,14 @@ const ViewNews = () => {
       </div>
 
       {/* Thumbnail */}
-      {news.thumbnail && (
-        <img src={`${API_BASE_URL}${news.thumbnail}`} alt="News Thumbnail" className="w-full h-64 object-cover rounded-md mb-6" />
-      )}
-
+      {/* Thumbnail */}
+{news.thumbnail && (
+  <img
+    src={news.thumbnail} // This should now be a full S3 URL
+    alt="News Thumbnail"
+    className="w-full h-64 object-cover rounded-md mb-6"
+  />
+)}
       {/* News Content */}
       <p className="text-gray-700 leading-relaxed">{news.content}</p>
 
