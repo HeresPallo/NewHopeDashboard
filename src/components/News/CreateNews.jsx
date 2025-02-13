@@ -2,7 +2,7 @@ import React from 'react';
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import * as jwt_decode from "jwt-decode";
+import jwt_decode from "jwt-decode";  // Correct way to import the jwt-decode package
 
 
 const CreateNews = () => {
@@ -37,7 +37,7 @@ const CreateNews = () => {
         console.log("JWT Token:", token); 
     
         if (token) {
-            const decodedToken = jwt_decode(token);
+            const decodedToken = jwt_decode(token); // This should work now
             console.log("Decoded Token:", decodedToken);
     
             // Check if the token is expired
@@ -52,7 +52,7 @@ const CreateNews = () => {
             try {
                 const data = new FormData();
                 
-                // Append form data fields (including file if applicable)
+                // Append form data fields
                 data.append("title", formData.title);
                 data.append("content", formData.content);
                 data.append("category", formData.category);
