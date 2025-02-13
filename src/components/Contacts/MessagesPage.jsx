@@ -8,7 +8,7 @@ const MessagesPage = () => {
     const [selectedMessageId, setSelectedMessageId] = useState(null);
 
     useEffect(() => {
-        axios.get("http://localhost:5001/messages")
+        axios.get("https://new-hope-e46616a5d911.herokuapp.com/messages")
             .then(response => setMessages(response.data))
             .catch(error => console.error("❌ Error fetching messages:", error));
     }, []);
@@ -20,7 +20,7 @@ const MessagesPage = () => {
         }
     
         try {
-            await axios.post(`http://localhost:5001/messages/${selectedMessageId}/respond`, { response });
+            await axios.post(`https://new-hope-e46616a5d911.herokuapp.com/messages/${selectedMessageId}/respond`, { response });
             alert("Response sent successfully!");
     
             // ✅ Update message list after response

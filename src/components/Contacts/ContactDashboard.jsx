@@ -9,11 +9,11 @@ const ContactsDashboard = () => {
     const [skills, setSkills] = useState([]); // ✅ Fetch skills from the database
 
     useEffect(() => {
-        axios.get("http://localhost:5001/surveys")
+        axios.get("https://new-hope-e46616a5d911.herokuapp.com/surveys")
             .then(response => setSurveys(response.data))
             .catch(error => console.error("❌ Error fetching surveys:", error));
 
-        axios.get("http://localhost:5001/skills-directory")
+        axios.get("https://new-hope-e46616a5d911.herokuapp.com/skills-directory")
             .then(response => setSkills(response.data))
             .catch(error => console.error("❌ Error fetching skills:", error));
     }, []);

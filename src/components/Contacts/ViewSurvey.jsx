@@ -13,12 +13,12 @@ const ViewSurvey = () => {
 
     useEffect(() => {
         // Fetch Survey Details
-        axios.get(`http://localhost:5001/surveys/${id}`)
+        axios.get(`https://new-hope-e46616a5d911.herokuapp.com/surveys/${id}`)
             .then(response => setSurvey(response.data))
             .catch(() => setErrorMessage("Survey not found."));
 
         // Fetch Responses for this Survey
-        axios.get(`http://localhost:5001/surveyresponses/${id}`)
+        axios.get(`https://new-hope-e46616a5d911.herokuapp.com/surveyresponses/${id}`)
             .then(response => setResponses(response.data))
             .catch(() => setErrorMessage("No responses found for this survey."));
 
@@ -30,7 +30,7 @@ const ViewSurvey = () => {
         if (!window.confirm("Are you sure you want to delete this survey?")) return;
 
         try {
-            await axios.delete(`http://localhost:5001/surveys/${id}`);
+            await axios.delete(`https://new-hope-e46616a5d911.herokuapp.com/surveys/${id}`);
             alert("Survey deleted successfully!");
             navigate("/contactsdashboard"); // Redirect after delete
         } catch (error) {
