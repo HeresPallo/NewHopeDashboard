@@ -9,13 +9,25 @@ const ViewNews = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const [news, setNews] = useState(null);
-
   useEffect(() => {
-    axios.get(`https://new-hope-e46616a5d911.herokuapp.com/news/${id}`)
-      .then(response => {
-        setNews(response.data);
+    // Get the JWT token from localStorage
+    const token = localStorage.getItem("token");
+
+    if (token) {
+      // Make the GET request with the Authorization header
+      axios.get(`https://new-hope-e46616a5d911.herokuapp.com/news/${id}`, {
+        headers: { "Authorization": `Bearer ${token}` }
       })
-      .catch(error => console.error("Error fetching news story:", error));
+      .then(response => {
+        setNews(response.data); // Set the news data if the request is successful
+      })
+      .catch(error => {
+        setErrorMessage("Failed to fetch news story.");
+        console.error("Error fetching news:", error);
+      });
+    } else {
+      setErrorMessage("You are not logged in. Please log in first.");
+    }
   }, [id]);
 
   const handleDeleteNews = async () => {
@@ -63,7 +75,6 @@ const ViewNews = () => {
         </p>
       </div>
 
-      {/* Thumbnail */}
       {/* Thumbnail */}
 {news.thumbnail && (
   <img

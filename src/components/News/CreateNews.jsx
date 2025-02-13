@@ -2,6 +2,7 @@ import React from 'react';
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import jwt_decode from "jwt-decode";
 
 const CreateNews = () => {
     const navigate = useNavigate();
@@ -30,44 +31,45 @@ const CreateNews = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
     
-        const user_id = localStorage.getItem("user_id"); // ✅ Ensure correct retrieval
+        // Retrieve the token from localStorage
         const token = localStorage.getItem("token");
     
-        console.log("🔍 Debugging Frontend:");
-        console.log("User ID:", user_id);
-        console.log("Token:", token);
+        if (token) {
+            // Decode the JWT to check its expiration
+            const decodedToken = jwt_decode(token);
+            console.log("Decoded Token:", decodedToken);
     
-        if (!user_id || !token) {
-            alert("User ID or token is missing. Please log in again.");
-            return;
-        }
+            // Check if the token is expired
+            if (decodedToken.exp < Date.now() / 1000) {
+                console.log("Token expired");
+                alert("Your session has expired. Please log in again.");
+                // Handle token expiration, for example by redirecting to login page
+                window.location.href = "/login"; // Or navigate to login page
+                return;
+            }
     
-        const data = new FormData();
-        data.append("title", formData.title);
-        data.append("content", formData.content);
-        data.append("category", formData.category);
-        data.append("status", formData.status);
-        data.append("user_id", user_id); // ✅ Include user_id explicitly
-        if (formData.thumbnail) {
-            data.append("thumbnail", formData.thumbnail);
-        }
-        console.log("📤 FormData Sent:", Object.fromEntries(data.entries())); // Debugging
-        
-
-        try {
-            await axios.post("https://new-hope-e46616a5d911.herokuapp.com/news", data, {
-                headers: {
-                    "Content-Type": "multipart/form-data",
-                    "Authorization": `Bearer ${token}`  // Send the token in the header
-                }
-            });
-            
+            // If the token is valid, proceed with form submission
+            try {
+                const data = new FormData();
+                // Add form data here
     
-            alert("News story created successfully!");
-            navigate("/newsdashboard");
-        } catch (error) {
-            console.error("❌ Error creating news story:", error.response?.data || error.message);
-            alert(`Failed to create news: ${error.response?.data?.error || "Unknown Error"}`);
+                await axios.post("https://new-hope-e46616a5d911.herokuapp.com/news", data, {
+                    headers: { 
+                        "Content-Type": "multipart/form-data",
+                        "Authorization": `Bearer ${token}` // Include the JWT token in the request
+                    },
+                });
+    
+                alert("News story created successfully!");
+                // Redirect or update the UI as needed
+            } catch (error) {
+                console.error("❌ Error creating news story:", error.response?.data || error.message);
+                alert(`Failed to create news: ${error.response?.data?.error || "Unknown Error"}`);
+            }
+        } else {
+            console.log("No token found");
+            alert("You need to be logged in to create news.");
+            window.location.href = "/login"; // Or navigate to login page
         }
     };
     
