@@ -2,14 +2,19 @@ import React from 'react';
 import { NavLink, useNavigate } from "react-router-dom";
 import { MdHouse, MdPeopleAlt, MdAddCard, MdNewspaper, MdContactPhone, MdSettings, MdExitToApp } from "react-icons/md";
 
-const Sidebar = () => {
+const Sidebar = ({ setIsAuthenticated }) => {
   const navigate = useNavigate();
 
   const handleLogout = () => {
+    // Remove authentication tokens from localStorage
     localStorage.removeItem("token");
     localStorage.removeItem("user_id");
-    setIsAuthenticated(false);  // Directly update auth state
-    navigate("/login"); // ✅ Redirect to login page
+
+    // Update authentication state in AllRouting
+    setIsAuthenticated(false);
+
+    // Redirect to login page
+    navigate("/login");
   };
 
  

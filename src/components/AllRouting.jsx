@@ -41,7 +41,7 @@ const AllRouting = () => {
 
     return (
         <div className="flex">
-            {/* {isAuthenticated && <Sidebar />} ✅ Sidebar only shows when authenticated */}
+           {isAuthenticated && <Sidebar setIsAuthenticated={setIsAuthenticated} />}
             <div className="flex-grow">
                 <Routes>
                     {/* Authentication Routes */}
