@@ -6,10 +6,13 @@ const Sidebar = () => {
   const navigate = useNavigate();
 
   const handleLogout = () => {
-    localStorage.removeItem("token"); // ✅ Remove token from local storage
+    localStorage.removeItem("token");
+    localStorage.removeItem("user_id");
+    setIsAuthenticated(false);  // Directly update auth state
     navigate("/login"); // ✅ Redirect to login page
   };
 
+ 
   return (
     <div>
       <aside id="logo-sidebar" className="fixed top-0 left-0 z-40 w-64 h-screen transition-transform -translate-x-full sm:translate-x-0" aria-label="Sidebar">
