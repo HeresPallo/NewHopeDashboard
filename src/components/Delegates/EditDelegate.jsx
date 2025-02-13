@@ -38,10 +38,11 @@ const EditDelegate = () => {
   // Fetch Delegate Data on Load
   useEffect(() => {
     if (!id) return;
-
+  
     axios.get(`https://new-hope-e46616a5d911.herokuapp.com/delegates/${id}`)
       .then(response => {
-        reset(response.data);
+        console.log("Fetched Delegate Data:", response.data);  // Debugging
+        reset(response.data); // Populate form with fetched data
         if (response.data.profilepic) setPreview(response.data.profilepic);
         setLoading(false);
       })
@@ -51,6 +52,7 @@ const EditDelegate = () => {
         setLoading(false);
       });
   }, [id, reset]);
+  
 
   // Fetch Organ Names
   useEffect(() => {
@@ -138,15 +140,93 @@ const EditDelegate = () => {
       <h2 className="text-3xl font-semibold text-center text-gray-800 mb-6">Edit Delegate</h2>
 
       <form onSubmit={handleSubmit(onSubmit)} className="grid grid-cols-2 gap-6">
-        {/* Form fields */}
-        {/* Name, Role, Phone, etc. */}
+  {/* Name */}
+  <div>
+    <label className="block text-gray-700">Name</label>
+    <input
+      type="text"
+      {...register("name")}
+      className="w-full p-3 border rounded-lg mt-1"
+    />
+    {errors.name && <p className="text-red-500 text-sm">{errors.name.message}</p>}
+  </div>
 
-        {/* Save & Delete Buttons */}
-        <div className="col-span-2 flex justify-between mt-6">
-          <button type="submit" className="bg-red-500 text-white px-6 py-3 rounded-lg hover:bg-red-600 transition-all">Save Changes</button>
-          <button type="button" onClick={handleDelete} className="bg-gray-700 text-white px-6 py-3 rounded-lg hover:bg-gray-800 transition-all">Delete Delegate</button>
-        </div>
-      </form>
+  {/* Role */}
+  <div>
+    <label className="block text-gray-700">Role</label>
+    <input
+      type="text"
+      {...register("role")}
+      className="w-full p-3 border rounded-lg mt-1"
+    />
+  </div>
+
+  {/* Phone */}
+  <div>
+    <label className="block text-gray-700">Phone Number</label>
+    <input
+      type="text"
+      {...register("phonenumber")}
+      className="w-full p-3 border rounded-lg mt-1"
+    />
+  </div>
+
+  {/* Email */}
+  <div>
+    <label className="block text-gray-700">Email</label>
+    <input
+      type="email"
+      {...register("email")}
+      className="w-full p-3 border rounded-lg mt-1"
+    />
+  </div>
+
+  {/* Address */}
+  <div>
+    <label className="block text-gray-700">Address</label>
+    <input
+      type="text"
+      {...register("address")}
+      className="w-full p-3 border rounded-lg mt-1"
+    />
+  </div>
+
+  {/* Constituency */}
+  <div>
+    <label className="block text-gray-700">Constituency</label>
+    <input
+      type="text"
+      {...register("constituency")}
+      className="w-full p-3 border rounded-lg mt-1"
+    />
+  </div>
+
+  {/* Organ Name */}
+  <div>
+    <label className="block text-gray-700">Organ Name</label>
+    <select {...register("organname")} className="w-full p-3 border rounded-lg mt-1">
+      <option value="">Select an Organ</option>
+      {organs.map(org => <option key={org.id} value={org.organname}>{org.organname}</option>)}
+    </select>
+  </div>
+
+  {/* Support Status */}
+  <div>
+    <label className="block text-gray-700">Support Status</label>
+    <select {...register("supportstatus")} className="w-full p-3 border rounded-lg mt-1">
+      <option value="supports">Supports</option>
+      <option value="opposes">Opposes</option>
+      <option value="neutral">Neutral</option>
+    </select>
+  </div>
+
+  {/* Save & Delete Buttons */}
+  <div className="col-span-2 flex justify-between mt-6">
+    <button type="submit" className="bg-red-500 text-white px-6 py-3 rounded-lg hover:bg-red-600 transition-all">Save Changes</button>
+    <button type="button" onClick={handleDelete} className="bg-gray-700 text-white px-6 py-3 rounded-lg hover:bg-gray-800 transition-all">Delete Delegate</button>
+  </div>
+</form>
+
     </div>
   );
 };
