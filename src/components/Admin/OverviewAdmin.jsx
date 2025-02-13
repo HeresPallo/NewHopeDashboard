@@ -18,9 +18,9 @@ const OverviewAdmin = () => {
     const fetchStats = async () => {
       try {
         const [delegatesRes, campaignsRes, newsRes] = await Promise.all([
-          axios.get("http://localhost:5001/monthlydelegates"),
-          axios.get("http://localhost:5001/campaigns"),
-          axios.get("http://localhost:5001/news"),
+          axios.get("https://new-hope-e46616a5d911.herokuapp.com/monthlydelegates"),
+          axios.get("https://new-hope-e46616a5d911.herokuapp.com/campaigns"),
+          axios.get("https://new-hope-e46616a5d911.herokuapp.com/news"),
         ]);
 
         setMonthlyDelegates(delegatesRes.data);
