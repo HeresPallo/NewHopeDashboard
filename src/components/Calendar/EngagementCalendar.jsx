@@ -23,8 +23,7 @@ const EngagementCalendar = ({ delegates }) => {
         setEngagements(response.data);
       })
       .catch(error => console.error("❌ Error fetching engagements:", error));
-  }, [delegates]);
-  
+  }, [delegates]);  
 
   // ✅ Handle Engagement Form Submission
   const handleSubmit = async () => {
@@ -64,14 +63,21 @@ const EngagementCalendar = ({ delegates }) => {
   // ✅ Handle Engagement Deletion
   const handleDelete = async (id) => {
     try {
-      await axios.delete(`https://new-hope-e46616a5d911.herokuapp.com/${id}`);
-
-      // ✅ Remove deleted engagement from state
-      setEngagements((prev) => prev.filter((engagement) => engagement.id !== id));
+      // Send DELETE request to backend
+      const response = await axios.delete(`https://new-hope-e46616a5d911.herokuapp.com/engagements/${id}`);
+  
+      // If successful, update state to remove the deleted engagement
+      if (response.status === 200) {
+        setEngagements((prev) => prev.filter((engagement) => engagement.id !== id));
+        console.log("❌ Engagement deleted:", id);
+      } else {
+        console.error("Failed to delete engagement.");
+      }
     } catch (error) {
       console.error("❌ Error deleting engagement:", error);
     }
   };
+  
 
   return (
     <div className="bg-white border border-gray-200 rounded-lg p-8 mt-8 shadow-md w-full flex flex-col lg:flex-row gap-8">
