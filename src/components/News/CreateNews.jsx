@@ -56,10 +56,10 @@ const CreateNews = () => {
 
         try {
             await axios.post("https://new-hope-e46616a5d911.herokuapp.com/news", data, {
-                headers: { 
+                headers: {
                     "Content-Type": "multipart/form-data",
-                    "Authorization": `Bearer ${token}` // ✅ Include JWT token
-                },
+                    "Authorization": `Bearer ${token}`  // Send the token in the header
+                }
             });
             
     
