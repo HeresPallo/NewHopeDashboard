@@ -81,14 +81,14 @@ const AddDelegateForm = () => {
   const onSubmit = async (formData) => {
     const data = new FormData();
     Object.entries(formData).forEach(([key, value]) => data.append(key, value));
-
+  
     if (picture) data.append("profilepic", picture);
-
+  
     try {
       await axios.post("https://new-hope-e46616a5d911.herokuapp.com/delegates", data, {
         headers: { "Content-Type": "multipart/form-data" },
       });
-
+  
       setSuccessMessage("Delegate added successfully!");
       setErrorMessage(null);
       setTimeout(() => navigate("/delegateorgans"), 1000);
@@ -98,6 +98,7 @@ const AddDelegateForm = () => {
       );
     }
   };
+  
 
   return (
     <div className="min-h-screen bg-white flex flex-col items-center justify-center p-10">
