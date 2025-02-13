@@ -65,20 +65,20 @@ const EditDelegate = () => {
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     if (!file) return;
-
+  
     const allowedTypes = ["image/png", "image/jpeg", "image/jpg"];
     if (!allowedTypes.includes(file.type)) {
       alert("Only JPEG and PNG images are allowed!");
       return;
     }
-
+  
     setPicture(file);
-    setValue("profilepic", file);
-
+    setValue("profilepic", file); // Ensure the form field for profilepic is set
     const reader = new FileReader();
     reader.onloadend = () => setPreview(reader.result);
     reader.readAsDataURL(file);
   };
+  
 
   // Handle Form Submission
   const onSubmit = async (formData) => {
@@ -219,6 +219,21 @@ const EditDelegate = () => {
       <option value="neutral">Neutral</option>
     </select>
   </div>
+
+  {/* Profile Picture Upload */}
+<div>
+  <label className="block text-gray-700">Profile Picture (Optional)</label>
+  <input
+    type="file"
+    accept="image/png, image/jpeg"
+    className="w-full p-2 border rounded-md mt-1 focus:outline-none"
+    onChange={handleFileChange}
+  />
+  {preview && (
+    <img src={preview} alt="Profile Preview" className="w-32 h-32 rounded-full mt-4" />
+  )}
+</div>
+
 
   {/* Save & Delete Buttons */}
   <div className="col-span-2 flex justify-between mt-6">
