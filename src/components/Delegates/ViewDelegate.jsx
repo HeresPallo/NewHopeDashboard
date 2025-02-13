@@ -41,17 +41,17 @@ const ViewDelegate = () => {
 
             {/* 🎭 Profile Section */}
             <div className="flex flex-col items-center mb-6">
-                {delegate.profilepic ? (
-                    <img
-                        src={`https://new-hope-e46616a5d911.herokuapp.com/${delegate.profilepic}`}
-                        alt={`${delegate.name}'s profile`}
-                        className="w-28 h-28 rounded-full object-cover border border-gray-300"
-                    />
-                ) : (
-                    <div className="w-28 h-28 rounded-full bg-gray-200 flex items-center justify-center text-gray-500">
-                        No Image
-                    </div>
-                )}
+            {delegate.profilepic ? (
+    <img
+        src={delegate.profilepic} // This will now contain the full S3 URL
+        alt={`${delegate.name}'s profile`}
+        className="w-28 h-28 rounded-full object-cover border border-gray-300"
+    />
+) : (
+    <div className="w-28 h-28 rounded-full bg-gray-200 flex items-center justify-center text-gray-500">
+        No Image
+    </div>
+)}
                 <h2 className="text-2xl font-semibold text-gray-800 mt-4">{delegate.name}</h2>
                 <p className="text-gray-600">{delegate.role}</p>
             </div>
