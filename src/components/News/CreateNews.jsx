@@ -35,21 +35,36 @@ const CreateNews = () => {
         // Retrieve the token from localStorage
         const token = localStorage.getItem("token");
         console.log("JWT Token:", token); 
-if (token) {
-    const decodedToken = jwt_decode(token);
-    console.log("Decoded Token:", decodedToken);
-
-    if (decodedToken.exp < Date.now() / 1000) {
-        console.log("Token expired");
-        alert("Your session has expired. Please log in again.");
-        window.location.href = "/login"; // Redirect to login page
-        return;
-    }
+    
+        if (token) {
+            const decodedToken = jwt_decode(token);
+            console.log("Decoded Token:", decodedToken);
+    
+            // Check if the token is expired
+            if (decodedToken.exp < Date.now() / 1000) {
+                console.log("Token expired");
+                alert("Your session has expired. Please log in again.");
+                window.location.href = "/login"; // Redirect to login page
+                return;
+            }
+    
             // If the token is valid, proceed with form submission
             try {
                 const data = new FormData();
-                // Add form data here
+                
+                // Append form data fields (including file if applicable)
+                data.append("title", formData.title);
+                data.append("content", formData.content);
+                data.append("category", formData.category);
+                data.append("status", formData.status);
+                data.append("user_id", decodedToken.id);  // Use decoded token's user_id
     
+                // If a thumbnail image is selected, append it to the FormData object
+                if (formData.thumbnail) {
+                    data.append("thumbnail", formData.thumbnail);
+                }
+    
+                // Send the request
                 await axios.post("https://new-hope-e46616a5d911.herokuapp.com/news", data, {
                     headers: { 
                         "Content-Type": "multipart/form-data",
@@ -58,7 +73,7 @@ if (token) {
                 });
     
                 alert("News story created successfully!");
-                // Redirect or update the UI as needed
+                navigate("/newsdashboard"); // Redirect to news dashboard after success
             } catch (error) {
                 console.error("❌ Error creating news story:", error.response?.data || error.message);
                 alert(`Failed to create news: ${error.response?.data?.error || "Unknown Error"}`);
@@ -66,13 +81,11 @@ if (token) {
         } else {
             console.log("No token found");
             alert("You need to be logged in to create news.");
-            window.location.href = "/login"; // Or navigate to login page
+            window.location.href = "/login"; // Redirect to login page if token is not found
         }
     };
     
     
-    
-
     return (
         <div className="min-h-screen flex flex-col items-center justify-center bg-white p-6">
             <div className="max-w-3xl w-full bg-gray-100 p-8">
