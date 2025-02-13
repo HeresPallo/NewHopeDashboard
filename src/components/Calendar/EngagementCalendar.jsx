@@ -16,14 +16,15 @@ const EngagementCalendar = ({ delegates }) => {
   useEffect(() => {
     if (!delegates.length) return;
     const delegateId = delegates[0]?.id;
-
-    axios.get(`https://new-hope-e46616a5d911.herokuapp.com/${delegateId}`)
+  
+    axios.get(`https://new-hope-e46616a5d911.herokuapp.com/engagements/${delegateId}`)
       .then(response => {
         console.log("📥 Engagements fetched:", response.data);
         setEngagements(response.data);
       })
       .catch(error => console.error("❌ Error fetching engagements:", error));
   }, [delegates]);
+  
 
   // ✅ Handle Engagement Form Submission
   const handleSubmit = async () => {
