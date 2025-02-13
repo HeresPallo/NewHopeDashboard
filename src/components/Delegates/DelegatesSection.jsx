@@ -12,7 +12,7 @@ const DelegatesSection = () => {
 
     // Submission API
      useEffect(() => {
-      axios.get('http://localhost:5001/delegatesorgan/')
+      axios.get('https://new-hope-e46616a5d911.herokuapp.com/delegatesorgan/')
         .then(response => setSubmissions(response.data))
         .catch(error => console.error('Error fetching submissions:', error));
     }, []);

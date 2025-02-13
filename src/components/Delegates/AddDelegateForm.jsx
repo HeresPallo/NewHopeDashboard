@@ -18,7 +18,7 @@ const AddDelegateForm = () => {
   // Fetch Organ Names from Database
   useEffect(() => {
     axios
-      .get("http://localhost:5001/delegateorgans")
+      .get("https://new-hope-e46616a5d911.herokuapp.com/delegateorgans")
       .then((response) => setOrgans(response.data))
       .catch((error) => console.error("Error fetching delegate organs:", error));
   }, []);
@@ -85,7 +85,7 @@ const AddDelegateForm = () => {
     if (picture) data.append("profilepic", picture);
 
     try {
-      await axios.post("http://localhost:5001/delegates", data, {
+      await axios.post("https://new-hope-e46616a5d911.herokuapp.com/delegates", data, {
         headers: { "Content-Type": "multipart/form-data" },
       });
 

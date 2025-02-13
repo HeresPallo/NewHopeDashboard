@@ -51,7 +51,7 @@ const CreateCampaignForm = () => {
         }
       });
       
-      const response = await axios.post("http://localhost:5001/campaigns", data, {
+      const response = await axios.post("https://new-hope-e46616a5d911.herokuapp.com/campaigns", data, {
         headers: { "Content-Type": "multipart/form-data" },
       });
 

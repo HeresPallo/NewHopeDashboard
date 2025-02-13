@@ -9,7 +9,7 @@ const ViewCampaigns = () => {
 
   useEffect(() => {
     axios
-      .get("http://localhost:5001/campaigns")
+      .get("https://new-hope-e46616a5d911.herokuapp.com/campaigns")
       .then((response) => setCampaigns(response.data))
       .catch((error) => console.error("Error fetching campaigns:", error));
   }, []);
@@ -32,7 +32,7 @@ const ViewCampaigns = () => {
             <div key={campaign.id} className="bg-gray-100 p-4 rounded-lg shadow-md">
             {campaign.thumbnail && (
   <img 
-    src={campaign.thumbnail.startsWith("http") ? campaign.thumbnail : `http://localhost:5001/${campaign.thumbnail}`} 
+    src={campaign.thumbnail.startsWith("http") ? campaign.thumbnail : `https://new-hope-e46616a5d911.herokuapp.com/${campaign.thumbnail}`} 
     alt={campaign.name} 
     className="w-full h-60 object-cover rounded-lg mb-4" 
   />

@@ -11,7 +11,7 @@ const CampaignDetails = () => {
   const [errorMessage, setErrorMessage] = useState(null);
 
   useEffect(() => {
-    axios.get(`http://localhost:5001/campaigns/${id}`)
+    axios.get(`https://new-hope-e46616a5d911.herokuapp.com/campaigns/${id}`)
       .then(response => {
         setCampaign(response.data);
         setLoading(false);
@@ -27,7 +27,7 @@ const CampaignDetails = () => {
     const confirmDelete = window.confirm("Are you sure you want to delete this campaign?");
     if (!confirmDelete) return;
     try {
-      await axios.delete(`http://localhost:5001/campaigns/${id}`);
+      await axios.delete(`https://new-hope-e46616a5d911.herokuapp.com/campaigns/${id}`);
       alert("Campaign deleted successfully!");
       navigate("/fundraiser/viewcampaigns");
     } catch (error) {
@@ -46,7 +46,7 @@ const CampaignDetails = () => {
       </button>
       {campaign.thumbnail && (
   <img 
-    src={campaign.thumbnail.startsWith("http") ? campaign.thumbnail : `http://localhost:5001/${campaign.thumbnail}`} 
+    src={campaign.thumbnail.startsWith("http") ? campaign.thumbnail : `https://new-hope-e46616a5d911.herokuapp.com/${campaign.thumbnail}`} 
     alt={campaign.name} 
     className="w-full h-60 object-cover rounded-lg mb-4" 
   />

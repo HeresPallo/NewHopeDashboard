@@ -12,7 +12,7 @@ const DelegatesOrgan = () => {
     useEffect(() => {
         const fetchDelegateOrgans = async () => {
             try {
-                const response = await axios.get("http://localhost:5001/delegateorgans");
+                const response = await axios.get("https://new-hope-e46616a5d911.herokuapp.com/delegateorgans");
                 setOrgans(response.data);
             } catch (error) {
                 console.error("Error fetching delegate organs:", error);
@@ -21,7 +21,7 @@ const DelegatesOrgan = () => {
 
         const fetchDelegates = async () => {
             try {
-                const response = await axios.get("http://localhost:5001/delegates");
+                const response = await axios.get("https://new-hope-e46616a5d911.herokuapp.com/delegates");
                 setDelegates(response.data);
             } catch (error) {
                 console.error("Error fetching delegates:", error);

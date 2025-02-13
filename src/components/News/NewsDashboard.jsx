@@ -3,14 +3,14 @@ import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import axios from "axios";
 
-const API_BASE_URL = "http://localhost:5001/uploads/";
+const API_BASE_URL = "https://new-hope-e46616a5d911.herokuapp.com/uploads/";
 
 const NewsDashboard = () => {
     const navigate = useNavigate();
     const [news, setNews] = useState([]);
 
     useEffect(() => {
-        axios.get("http://localhost:5001/news")
+        axios.get("https://new-hope-e46616a5d911.herokuapp.com/news")
             .then(response => setNews(response.data))
             .catch(error => console.error("Error fetching news:", error));
     }, []);

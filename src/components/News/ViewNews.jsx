@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 
-const API_BASE_URL = "http://localhost:5001/uploads/";
+const API_BASE_URL = "https://new-hope-e46616a5d911.herokuapp.com/uploads/";
 
 const ViewNews = () => {
   const { id } = useParams();
@@ -11,7 +11,7 @@ const ViewNews = () => {
   const [news, setNews] = useState(null);
 
   useEffect(() => {
-    axios.get(`http://localhost:5001/news/${id}`)
+    axios.get(`https://new-hope-e46616a5d911.herokuapp.com/news/${id}`)
       .then(response => {
         setNews(response.data);
       })
@@ -22,7 +22,7 @@ const ViewNews = () => {
     try {
         const token = localStorage.getItem("token");
 
-        const response = await axios.delete(`http://localhost:5001/news/${id}`, { // ✅ Fix: Use `id` directly
+        const response = await axios.delete(`https://new-hope-e46616a5d911.herokuapp.com/news/${id}`, { // ✅ Fix: Use `id` directly
             headers: { "Authorization": `Bearer ${token}` }
         });
 

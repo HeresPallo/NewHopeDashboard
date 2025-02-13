@@ -39,7 +39,7 @@ const EditDelegate = () => {
     useEffect(() => {
         if (!id) return;
 
-        axios.get(`http://localhost:5001/delegates/${id}`)
+        axios.get(`https://new-hope-e46616a5d911.herokuapp.com/delegates/${id}`)
             .then(response => {
                 reset(response.data);
                 if (response.data.profilepic) setPreview(response.data.profilepic);
@@ -54,7 +54,7 @@ const EditDelegate = () => {
 
     // ✅ Fetch Organ Names
     useEffect(() => {
-        axios.get("http://localhost:5001/delegateorgans")
+        axios.get("https://new-hope-e46616a5d911.herokuapp.com/delegateorgans")
             .then(response => setOrgans(response.data))
             .catch(error => console.error("Error fetching organs:", error));
     }, []);
@@ -96,7 +96,7 @@ const EditDelegate = () => {
         }
 
         try {
-            await axios.patch(`http://localhost:5001/delegates/${id}`, data, {
+            await axios.patch(`https://new-hope-e46616a5d911.herokuapp.com/delegates/${id}`, data, {
                 headers: { "Content-Type": "multipart/form-data" },
             });
 
@@ -114,7 +114,7 @@ const EditDelegate = () => {
         if (!confirmDelete) return;
 
         try {
-            await axios.delete(`http://localhost:5001/delegates/${id}`);
+            await axios.delete(`https://new-hope-e46616a5d911.herokuapp.com/delegates/${id}`);
             alert("Delegate deleted successfully!");
             navigate("/delegateorgans");
         } catch (error) {

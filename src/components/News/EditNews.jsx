@@ -18,7 +18,7 @@ const EditNews = () => {
   const statuses = ["admin", "user"];
 
   useEffect(() => {
-    axios.get(`http://localhost:5001/news/${id}`)
+    axios.get(`https://new-hope-e46616a5d911.herokuapp.com/news/${id}`)
       .then(response => {
         setFormData(response.data);
       })
@@ -46,7 +46,7 @@ const EditNews = () => {
             if (value) data.append(key, value);
         });
 
-        const response = await axios.patch(`http://localhost:5001/news/${id}`, data, {
+        const response = await axios.patch(`https://new-hope-e46616a5d911.herokuapp.com/news/${id}`, data, {
             headers: { 
                 "Content-Type": "multipart/form-data",
                 "Authorization": `Bearer ${token}` // ✅ Include JWT token

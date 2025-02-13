@@ -12,7 +12,7 @@ const ViewDelegate = () => {
     const [errorMessage, setErrorMessage] = useState(null);
 
     useEffect(() => {
-        axios.get(`http://localhost:5001/delegates/${id}`)
+        axios.get(`https://new-hope-e46616a5d911.herokuapp.com/delegates/${id}`)
             .then(response => {
                 setDelegate(response.data);
                 setLoading(false);
@@ -43,7 +43,7 @@ const ViewDelegate = () => {
             <div className="flex flex-col items-center mb-6">
                 {delegate.profilepic ? (
                     <img
-                        src={`http://localhost:5001/${delegate.profilepic}`}
+                        src={`https://new-hope-e46616a5d911.herokuapp.com/${delegate.profilepic}`}
                         alt={`${delegate.name}'s profile`}
                         className="w-28 h-28 rounded-full object-cover border border-gray-300"
                     />

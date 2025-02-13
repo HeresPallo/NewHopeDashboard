@@ -20,7 +20,7 @@ const DelegateDetails = () => {
     const fetchDelegates = async () => {
       try {
         const response = await axios.get(
-          `http://localhost:5001/delegateorgans/${encodeURIComponent(organname)}/delegates`
+          `https://new-hope-e46616a5d911.herokuapp.com/delegateorgans/${encodeURIComponent(organname)}/delegates`
         );
         setDelegates(response.data);
         setLoading(false);
