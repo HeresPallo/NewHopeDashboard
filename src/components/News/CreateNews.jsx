@@ -2,7 +2,8 @@ import React from 'react';
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import jwt_decode from "jwt-decode";
+import * as jwt_decode from "jwt-decode";
+
 
 const CreateNews = () => {
     const navigate = useNavigate();
@@ -33,21 +34,17 @@ const CreateNews = () => {
     
         // Retrieve the token from localStorage
         const token = localStorage.getItem("token");
-    
-        if (token) {
-            // Decode the JWT to check its expiration
-            const decodedToken = jwt_decode(token);
-            console.log("Decoded Token:", decodedToken);
-    
-            // Check if the token is expired
-            if (decodedToken.exp < Date.now() / 1000) {
-                console.log("Token expired");
-                alert("Your session has expired. Please log in again.");
-                // Handle token expiration, for example by redirecting to login page
-                window.location.href = "/login"; // Or navigate to login page
-                return;
-            }
-    
+        console.log("JWT Token:", token); 
+if (token) {
+    const decodedToken = jwt_decode(token);
+    console.log("Decoded Token:", decodedToken);
+
+    if (decodedToken.exp < Date.now() / 1000) {
+        console.log("Token expired");
+        alert("Your session has expired. Please log in again.");
+        window.location.href = "/login"; // Redirect to login page
+        return;
+    }
             // If the token is valid, proceed with form submission
             try {
                 const data = new FormData();
