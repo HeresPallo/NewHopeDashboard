@@ -20,7 +20,7 @@ const AuthPage = ({ type }) => {
         e.preventDefault();
         try {
             const endpoint = type === "register" ? "/register" : "/login";
-            const response = await axios.post(`https://new-hope-e46616a5d911.herokuapp.com${endpoint}`, formData);
+            const response = await axios.post('https://new-hope-e46616a5d911.herokuapp.com/login', formData);
 
     
             if (type === "login") {
@@ -36,10 +36,6 @@ const AuthPage = ({ type }) => {
         }
     };
     
-    
-    
-    
-
     return (
         <div className="min-h-screen flex items-center justify-centerbg-gradient-to-br from-red-600 to-red-500">
             <div className="bg-white p-6 rounded-lg  w-96">
