@@ -26,6 +26,7 @@ import CreateSurvey from "./Contacts/CreateSurvey";
 import ViewMessage from "./Contacts/ViewMessage";
 import MessagesPage from "./Contacts/MessagesPage";
 import ViewSurvey from "./Contacts/ViewSurvey";
+import SkillsDirectoryDashboard from './Contacts/SkillsDirectoryDashboard';
 
 const AllRouting = () => {
     const [isAuthenticated, setIsAuthenticated] = useState(!!localStorage.getItem("token"));
@@ -73,6 +74,7 @@ const AllRouting = () => {
                             <Route path="/viewsurvey/:id" element={<ViewSurvey />} />
                             <Route path="/viewmessage/:id" element={<ViewMessage />} />
                             <Route path="/messages" element={<MessagesPage />} />
+                            <Route path="/skills-directory" element={<SkillsDirectoryDashboard />} />
                         </>
                     ) : (
                         <Route path="*" element={<Navigate to="/login" />} />
