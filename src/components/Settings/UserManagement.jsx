@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
-const API_BASE_URL = "https://new-hope-e46616a5d911.herokuapp.com";
+const API_BASE_URL = "https://new-hope-e46616a5d911.herokuapp.com"; // Production API URL
 
 const UserManagementDashboard = () => {
   const navigate = useNavigate();
@@ -34,7 +34,7 @@ const UserManagementDashboard = () => {
     }
   };
 
-  // Handle admin user creation
+  // Handle admin user creation using the /register endpoint
   const handleCreateAdmin = async () => {
     if (!adminName || !adminEmail || !adminPassword) {
       alert("Please fill in all fields to create an admin user.");
@@ -42,13 +42,12 @@ const UserManagementDashboard = () => {
     }
     setCreatingAdmin(true);
     try {
-      // Create a new admin user. We assume your backend creates an admin
-      // when you set the role to "admin".
-      const response = await axios.post(`${API_BASE_URL}/users`, {
+      // Post to /register instead of /users
+      const response = await axios.post(`${API_BASE_URL}/register`, {
         name: adminName,
         email: adminEmail,
         password: adminPassword,
-        role: "admin",
+        // The backend code registers as admin if email is provided
       });
       alert("Admin user created successfully!");
       setAdminName("");
@@ -76,11 +75,37 @@ const UserManagementDashboard = () => {
   };
 
   return (
-    <div className="p-8 bg-white min-h-screen">
-      <h2 className="text-2xl font-bold mb-6">User Management Dashboard</h2>
+    <div className="flex flex-col p-8 bg-white min-h-screen">
+      {/* Dashboard Header */}
+      <div className="flex justify-between items-center mb-6 border-b pb-4">
+        <h2 className="text-xl font-semibold text-gray-800">Contacts Dashboard</h2>
+        <button
+          onClick={() => navigate("/createsurvey")}
+          className="px-5 py-2 bg-red-600 text-white font-medium rounded-md hover:bg-red-700 transition"
+        >
+          + Create Survey
+        </button>
+      </div>
+
+      {/* Surveys Section */}
+      <h3 className="text-lg font-semibold text-gray-700 mt-4 mb-2">Surveys</h3>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {/* ... existing survey display code ... */}
+      </div>
+
+      {/* Messages Section */}
+      <div className="bg-white shadow-sm border rounded-lg p-4 flex justify-between items-center mt-8">
+        <h3 className="text-lg font-semibold text-gray-700">User Messages</h3>
+        <button
+          onClick={() => navigate("/messages")}
+          className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition"
+        >
+          View Messages
+        </button>
+      </div>
 
       {/* Section: Create Admin User */}
-      <div className="mb-8 p-6 border rounded-lg shadow-sm">
+      <div className="mb-8 p-6 border rounded-lg shadow-sm mt-8">
         <h3 className="text-xl font-semibold mb-4">Create Admin User</h3>
         <div className="mb-4">
           <label className="block mb-1">Name</label>
@@ -109,9 +134,9 @@ const UserManagementDashboard = () => {
             className="w-full p-2 border rounded"
           />
         </div>
-        <button 
+        <button
           onClick={handleCreateAdmin}
-          className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition"
+          className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition"
           disabled={creatingAdmin}
         >
           {creatingAdmin ? "Creating..." : "Create Admin User"}
@@ -142,7 +167,7 @@ const UserManagementDashboard = () => {
                   <td className="p-3">{user.name}</td>
                   <td className="p-3">{user.phone_number}</td>
                   <td className="p-3">
-                    <button 
+                    <button
                       onClick={() => handleDeleteMobileUser(user.id)}
                       className="px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700 transition"
                     >
