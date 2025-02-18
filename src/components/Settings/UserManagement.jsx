@@ -78,30 +78,8 @@ const UserManagementDashboard = () => {
     <div className="flex flex-col p-8 bg-white min-h-screen">
       {/* Dashboard Header */}
       <div className="flex justify-between items-center mb-6 border-b pb-4">
-        <h2 className="text-xl font-semibold text-gray-800">Contacts Dashboard</h2>
-        <button
-          onClick={() => navigate("/createsurvey")}
-          className="px-5 py-2 bg-red-600 text-white font-medium rounded-md hover:bg-red-700 transition"
-        >
-          + Create Survey
-        </button>
-      </div>
-
-      {/* Surveys Section */}
-      <h3 className="text-lg font-semibold text-gray-700 mt-4 mb-2">Surveys</h3>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {/* ... existing survey display code ... */}
-      </div>
-
-      {/* Messages Section */}
-      <div className="bg-white shadow-sm border rounded-lg p-4 flex justify-between items-center mt-8">
-        <h3 className="text-lg font-semibold text-gray-700">User Messages</h3>
-        <button
-          onClick={() => navigate("/messages")}
-          className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition"
-        >
-          View Messages
-        </button>
+        <h2 className="text-xl font-semibold text-gray-800">User Management Dashboard</h2>
+        
       </div>
 
       {/* Section: Create Admin User */}
