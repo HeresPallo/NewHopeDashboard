@@ -27,6 +27,7 @@ import ViewMessage from "./Contacts/ViewMessage";
 import MessagesPage from "./Contacts/MessagesPage";
 import ViewSurvey from "./Contacts/ViewSurvey";
 import SkillsDirectoryDashboard from './Contacts/SkillsDirectoryDashboard';
+import UserManagementDashboard from './Settings/UserManagement';
 
 const AllRouting = () => {
     const [isAuthenticated, setIsAuthenticated] = useState(!!localStorage.getItem("token"));
@@ -75,6 +76,7 @@ const AllRouting = () => {
                             <Route path="/viewmessage/:id" element={<ViewMessage />} />
                             <Route path="/messages" element={<MessagesPage />} />
                             <Route path="/skills-directory" element={<SkillsDirectoryDashboard />} />
+                            <Route path="/user-management" element={<UserManagementDashboard />} />
                         </>
                     ) : (
                         <Route path="*" element={<Navigate to="/login" />} />
