@@ -28,14 +28,13 @@ const ViewSurvey = () => {
     setLoading(false);
   }, [id]);
 
-  // Export survey responses to Excel using xlsx and file-saver
+  // Export survey responses to Excel
   const handleExport = () => {
     if (responses.length === 0) {
       alert("No responses available to export.");
       return;
     }
 
-    // Map responses to a flat JSON array for Excel
     const data = responses.map(response => ({
       Name: response.name,
       Phone: response.phone,
@@ -45,12 +44,9 @@ const ViewSurvey = () => {
       "Submitted At": new Date(response.created_at).toLocaleString(),
     }));
 
-    // Create worksheet and workbook
     const worksheet = XLSX.utils.json_to_sheet(data);
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, "SurveyResponses");
-
-    // Write workbook and trigger download
     const excelBuffer = XLSX.write(workbook, { bookType: "xlsx", type: "array" });
     const dataBlob = new Blob([excelBuffer], { type: "application/octet-stream" });
     saveAs(dataBlob, "SurveyResponses.xlsx");
@@ -63,9 +59,9 @@ const ViewSurvey = () => {
     try {
       await axios.delete(`${API_BASE_URL}/surveys/${id}`);
       alert("Survey deleted successfully!");
-      navigate("/contactsdashboard"); // Redirect after delete
+      navigate("/contactsdashboard");
     } catch (error) {
-      console.error("❌ Error deleting survey:", error);
+      console.error("Error deleting survey:", error);
       alert("Failed to delete survey.");
     }
   };
@@ -74,22 +70,22 @@ const ViewSurvey = () => {
   if (!survey) return <p className="text-red-500">Survey not found.</p>;
 
   return (
-    <div className="max-w-4xl mx-auto p-6 bg-white shadow-md rounded-lg mt-6">
+    <div className="max-w-4xl mx-auto p-6 bg-white rounded mt-6">
       <button onClick={() => navigate("/contactsdashboard")} className="text-blue-500 hover:underline mb-4">
         ← Back
       </button>
-      <h2 className="text-2xl font-semibold">{survey.title}</h2>
+      <h2 className="text-2xl font-semibold mb-2">{survey.title}</h2>
       <p className="text-gray-600 mb-4">{survey.description || "No description available"}</p>
 
-      {/* 📊 Respondents Table */}
-      <h3 className="text-lg font-semibold mt-6">Survey Responses</h3>
-      <div className="bg-white shadow-sm border rounded-lg mt-4 overflow-x-auto">
-        <table className="w-full border-collapse text-sm">
+      {/* Respondents Table */}
+      <h3 className="text-lg font-semibold mt-6 mb-4">Survey Responses</h3>
+      <div className="overflow-x-auto">
+        <table className="w-full border-collapse text-sm border">
           <thead>
-            <tr className="text-gray-600 bg-gray-100 border-b">
-              <th className="p-3 text-left">Name</th>
-              <th className="p-3 text-left">Phone</th>
-              <th className="p-3 text-left">Responses</th>
+            <tr className="bg-gray-100 border-b">
+              <th className="p-3 text-left border-r">Name</th>
+              <th className="p-3 text-left border-r">Phone</th>
+              <th className="p-3 text-left border-r">Responses</th>
               <th className="p-3 text-left">Submitted At</th>
             </tr>
           </thead>
@@ -103,9 +99,9 @@ const ViewSurvey = () => {
             ) : (
               responses.map((response) => (
                 <tr key={response.id} className="border-b hover:bg-gray-50">
-                  <td className="p-3">{response.name}</td>
-                  <td className="p-3">{response.phone}</td>
-                  <td className="p-3 text-gray-600">
+                  <td className="p-3 border-r">{response.name}</td>
+                  <td className="p-3 border-r">{response.phone}</td>
+                  <td className="p-3 border-r text-gray-600">
                     {response.answers.map((entry, index) => (
                       <div key={index}>
                         <strong>{entry.question}:</strong> {entry.answer}
