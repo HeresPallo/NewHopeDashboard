@@ -10,6 +10,7 @@ const AddDelegateForm = () => {
   const navigate = useNavigate();
   const formRef = useRef();
   const [organs, setOrgans] = useState([]);
+  const [delegates, setDelegates] = useState([]); // Add this line
   const [errorMessage, setErrorMessage] = useState(null);
   const [successMessage, setSuccessMessage] = useState(null);
   const [picture, setPicture] = useState(null);
