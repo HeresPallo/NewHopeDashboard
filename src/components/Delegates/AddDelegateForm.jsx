@@ -5,6 +5,8 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import Papa from "papaparse";
+import * as XLSX from "xlsx";
 
 const AddDelegateForm = () => {
   const navigate = useNavigate();
@@ -52,6 +54,43 @@ const AddDelegateForm = () => {
       setDelegates([]); // ✅ Clear data after submission
     } catch (error) {
       setErrorMessage(error.response?.data?.error || "An unexpected error occurred.");
+    }
+  };
+
+  const handleFileUpload = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+  
+    const fileExtension = file.name.split('.').pop().toLowerCase();
+  
+    if (fileExtension === 'csv') {
+      Papa.parse(file, {
+        header: true,
+        skipEmptyLines: true,
+        complete: (results) => {
+          setDelegates(results.data);
+        },
+        error: (err) => console.error("CSV Parsing Error:", err),
+      });
+    } else if (fileExtension === 'xlsx' || fileExtension === 'xls') {
+      const reader = new FileReader();
+      reader.onload = (evt) => {
+        const data = evt.target.result;
+        // Read the binary string and parse the workbook
+        const workbook = XLSX.read(data, { type: 'binary' });
+        // Assume the first sheet is the one we want
+        const firstSheetName = workbook.SheetNames[0];
+        const worksheet = workbook.Sheets[firstSheetName];
+        // Convert sheet to JSON
+        const jsonData = XLSX.utils.sheet_to_json(worksheet, { defval: "" });
+        setDelegates(jsonData);
+      };
+      reader.onerror = (evt) => {
+        console.error("Error reading XLSX file:", evt);
+      };
+      reader.readAsBinaryString(file);
+    } else {
+      alert("Unsupported file type. Please upload a CSV or XLSX file.");
     }
   };
 
@@ -143,11 +182,12 @@ const AddDelegateForm = () => {
          <div className="mb-6">
             <label className="block text-gray-700 font-semibold">Upload CSV File</label>
             <input
-              type="file"
-              accept=".csv"
-              onChange={handleCSVUpload}
-              className="w-full p-2 border rounded-md"
-            />
+  type="file"
+  accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
+  onChange={handleFileUpload}
+  className="w-full p-2 border rounded-md"
+/>
+
           </div>
 
         {/* ✅ Display CSV Data Preview */}
