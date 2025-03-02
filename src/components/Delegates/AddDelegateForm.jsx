@@ -23,6 +23,37 @@ const AddDelegateForm = () => {
       .catch((error) => console.error("Error fetching delegate organs:", error));
   }, []);
 
+  // ✅ Handle CSV Upload & Parse
+  const handleCSVUpload = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    Papa.parse(file, {
+      header: true,
+      skipEmptyLines: true,
+      complete: (results) => {
+        setDelegates(results.data);
+      },
+      error: (err) => console.error("CSV Parsing Error:", err),
+    });
+  };
+
+  // ✅ Handle CSV Bulk Upload Submission
+  const handleBulkSubmit = async () => {
+    if (delegates.length === 0) {
+      alert("No data available to submit.");
+      return;
+    }
+
+    try {
+      await axios.post("https://new-hope-e46616a5d911.herokuapp.com/delegates/bulk", { delegates });
+      setSuccessMessage("Delegates added successfully!");
+      setDelegates([]); // ✅ Clear data after submission
+    } catch (error) {
+      setErrorMessage(error.response?.data?.error || "An unexpected error occurred.");
+    }
+  };
+
   // Zod Validation Schema
   const schema = z.object({
     name: z.string().min(3, { message: "Name is required" }),
@@ -106,6 +137,52 @@ const AddDelegateForm = () => {
         <h2 className="text-4xl font-bold text-gray-900 text-center mb-6">
           Add Delegate
         </h2>
+
+         {/* ✅ CSV Upload Section */}
+         <div className="mb-6">
+            <label className="block text-gray-700 font-semibold">Upload CSV File</label>
+            <input
+              type="file"
+              accept=".csv"
+              onChange={handleCSVUpload}
+              className="w-full p-2 border rounded-md"
+            />
+          </div>
+
+        {/* ✅ Display CSV Data Preview */}
+        {delegates.length > 0 && (
+            <div className="bg-white p-4 shadow-md rounded-md">
+              <h3 className="text-lg font-semibold mb-2">CSV Preview</h3>
+              <table className="w-full border-collapse">
+                <thead>
+                  <tr className="text-gray-700 border-b">
+                    <th className="p-2">Name</th>
+                    <th className="p-2">Role</th>
+                    <th className="p-2">Phone</th>
+                    <th className="p-2">Email</th>
+                    <th className="p-2">Organ</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {delegates.slice(0, 5).map((delegate, index) => (
+                    <tr key={index} className="border-b">
+                      <td className="p-2">{delegate.name}</td>
+                      <td className="p-2">{delegate.role}</td>
+                      <td className="p-2">{delegate.phonenumber}</td>
+                      <td className="p-2">{delegate.email}</td>
+                      <td className="p-2">{delegate.organname}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              <button
+                onClick={handleBulkSubmit}
+                className="mt-4 w-full py-2 bg-blue-600 text-white font-semibold rounded-md hover:bg-blue-700 transition"
+              >
+                Submit CSV Data
+              </button>
+            </div>
+          )}
 
         <div className="bg-gray-100 p-8 rounded-lg shadow-lg">
           <form ref={formRef} onSubmit={handleSubmit(onSubmit)} className="space-y-6">
