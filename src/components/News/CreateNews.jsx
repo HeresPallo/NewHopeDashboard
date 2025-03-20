@@ -1,21 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import * as jwtDecodeModule from "jwt-decode";
-
-
-
 
 const CreateNews = () => {
   const navigate = useNavigate();
-  const jwtDecode = jwtDecodeModule.default || jwtDecodeModule;
 
   // Retrieve the token from localStorage
   const token = localStorage.getItem("token");
   let defaultStatus = "user";
   if (token) {
-    const decodedToken = jwtDecode(token);
-    defaultStatus = decodedToken.role === "admin" ? "admin" : "user";
+    const decodedToken = decodeJwt(token);
+    defaultStatus = decodedToken && decodedToken.role === "admin" ? "admin" : "user";
   }
 
   const [formData, setFormData] = useState({
@@ -47,7 +42,7 @@ const CreateNews = () => {
     console.log("JWT Token:", token); 
 
     if (token) {
-      const decodedToken = jwtDecode(token);
+      const decodedToken = decodeJwt(token);
       console.log("Decoded Token:", decodedToken);
 
       // Check if the token is expired
@@ -90,6 +85,19 @@ const CreateNews = () => {
       window.location.href = "/login";
     }
   };
+
+  // Simple JWT decoder (no signature verification)
+  function decodeJwt(token) {
+    try {
+      const payload = token.split('.')[1];
+      const base64 = payload.replace(/-/g, '+').replace(/_/g, '/');
+      const decodedPayload = JSON.parse(atob(base64));
+      return decodedPayload;
+    } catch (e) {
+      console.error("Failed to decode token", e);
+      return null;
+    }
+  }
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-white p-6">
