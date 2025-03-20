@@ -1,9 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import * as jwtDecode from "jwt-decode";
-
-
+import jwt_decode from "jwt-decode";
 
 const CreateNews = () => {
   const navigate = useNavigate();
@@ -12,7 +10,7 @@ const CreateNews = () => {
   const token = localStorage.getItem("token");
   let defaultStatus = "user";
   if (token) {
-    const decodedToken = jwtDecode(token);
+    const decodedToken = jwt_decode(token);
     defaultStatus = decodedToken.role === "admin" ? "admin" : "user";
   }
 
