@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import { default as jwtDecode } from "jwt-decode";
+import * as jwtDecode from "jwt-decode";
+
 
 
 const CreateNews = () => {
