@@ -67,19 +67,15 @@ const SkillsDirectoryDashboard = () => {
                 <td className="p-3 text-gray-600">{new Date(user.date_of_birth).toLocaleDateString()}</td>
                 <td className="p-3 text-gray-600">{user.skills}</td>
                 <td className="p-3 text-gray-600">
-                  {user.resume ? (
-                    <a
-                      href={`${API_BASE_URL}/uploads/resumes/${user.resume}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-blue-600 hover:underline"
-                    >
-                      📄 Download
-                    </a>
-                  ) : (
-                    <span className="text-gray-400">No Resume</span>
-                  )}
-                </td>
+  {user.resume ? (
+    <a href={user.resume} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
+      Download Resume
+    </a>
+  ) : (
+    <span className="text-gray-400">No Resume</span>
+  )}
+</td>
+
               </tr>
             ))}
           </tbody>
