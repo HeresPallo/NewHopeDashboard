@@ -24,7 +24,7 @@ const SkillsDirectoryDashboard = () => {
       Email: user.email,
       "Date of Birth": new Date(user.date_of_birth).toLocaleDateString(),
       Skills: user.skills,
-      Resume: user.resume ? `${API_BASE_URL}/uploads/resumes/${user.resume}` : "No Resume",
+      Resume: user.resume ? user.resume : "No Resume", // ✅ Uses full S3 URL
     }));
 
     const worksheet = XLSX.utils.json_to_sheet(data);
