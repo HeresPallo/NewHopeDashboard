@@ -155,6 +155,8 @@ const AddDelegateForm = () => {
   
     if (picture) data.append("profilepic", picture);
   
+    console.log("📤 Submitting Form Data:", [...data]);
+  
     try {
       await axios.post("https://new-hope-e46616a5d911.herokuapp.com/delegates", data, {
         headers: { "Content-Type": "multipart/form-data" },
@@ -164,13 +166,11 @@ const AddDelegateForm = () => {
       setErrorMessage(null);
       setTimeout(() => navigate("/delegateorgans"), 1000);
     } catch (error) {
-      setErrorMessage(
-        error.response?.data?.error || "An unexpected error occurred."
-      );
+      console.error("❌ Error submitting delegate:", error.response?.data || error);
+      setErrorMessage(error.response?.data?.error || "An unexpected error occurred.");
     }
   };
   
-
   return (
     <div className="min-h-screen bg-white flex flex-col items-center justify-center p-10">
       <div className="max-w-3xl w-full">
