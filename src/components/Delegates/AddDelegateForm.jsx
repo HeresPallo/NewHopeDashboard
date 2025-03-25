@@ -151,11 +151,19 @@ const AddDelegateForm = () => {
   // Form Submission
   const onSubmit = async (formData) => {
     const data = new FormData();
-    Object.entries(formData).forEach(([key, value]) => data.append(key, value));
+    
+    // ✅ Only append required fields
+    const { name, role, phonenumber, email, address, constituency, supportstatus, organname } = formData;
+    data.append("name", name);
+    data.append("role", role);
+    data.append("phonenumber", phonenumber);
+    data.append("email", email);
+    data.append("address", address);
+    data.append("constituency", constituency);
+    data.append("supportstatus", supportstatus);
+    data.append("organname", organname);
   
-    if (picture) data.append("profilepic", picture);
-  
-    console.log("📤 Submitting Form Data:", [...data]);
+    if (picture) data.append("profilepic", picture); // ✅ Only include profile picture
   
     try {
       await axios.post("https://new-hope-e46616a5d911.herokuapp.com/delegates", data, {
@@ -170,6 +178,7 @@ const AddDelegateForm = () => {
       setErrorMessage(error.response?.data?.error || "An unexpected error occurred.");
     }
   };
+  
   
   return (
     <div className="min-h-screen bg-white flex flex-col items-center justify-center p-10">
