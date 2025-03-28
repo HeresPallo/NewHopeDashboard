@@ -9,20 +9,34 @@ const API_BASE_URL = "https://new-hope-e46616a5d911.herokuapp.com";
 const SkillsDirectoryDashboard = () => {
   const navigate = useNavigate();
   const [skills, setSkills] = useState([]);
+  const [searchTerm, setSearchTerm] = useState(""); // State to store search query
+  const [filteredSkills, setFilteredSkills] = useState([]); // State for filtered skills based on search
 
   useEffect(() => {
     fetchSkills();
   }, []);
 
+  useEffect(() => {
+    // Filter skills based on search term
+    const results = skills.filter(skill => 
+      skill.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
+      skill.skills.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+    setFilteredSkills(results);
+  }, [searchTerm, skills]); // Re-run when searchTerm or skills change
+
   const fetchSkills = () => {
     axios.get(`${API_BASE_URL}/skills-directory`)
-      .then(response => setSkills(response.data))
+      .then(response => {
+        setSkills(response.data);
+        setFilteredSkills(response.data); // Initialize filteredSkills
+      })
       .catch(error => console.error("❌ Error fetching skills:", error));
   };
 
   // Export to Excel
   const handleExport = () => {
-    const data = skills.map(user => ({
+    const data = filteredSkills.map(user => ({
       Name: user.name,
       Address: user.address,
       Email: user.email,
@@ -72,6 +86,15 @@ const SkillsDirectoryDashboard = () => {
 
       <h2 className="text-2xl font-bold mb-6">Skills Directory</h2>
 
+      {/* 🔍 Search Bar */}
+      <input
+        type="text"
+        placeholder="Search by Name or Skills"
+        value={searchTerm}
+        onChange={(e) => setSearchTerm(e.target.value)}
+        className="p-3 border border-gray-300 rounded-md mb-6 w-full"
+      />
+
       {/* 📄 Skills Table */}
       <div className="overflow-x-auto">
         <table className="w-full border-collapse text-sm">
@@ -87,32 +110,38 @@ const SkillsDirectoryDashboard = () => {
             </tr>
           </thead>
           <tbody>
-            {skills.map((user) => (
-              <tr key={user.id} className="border-b hover:bg-gray-50">
-                <td className="p-3 font-medium text-gray-700">{user.name}</td>
-                <td className="p-3 text-gray-600">{user.address}</td>
-                <td className="p-3 text-gray-600">{user.email}</td>
-                <td className="p-3 text-gray-600">{new Date(user.date_of_birth).toLocaleDateString()}</td>
-                <td className="p-3 text-gray-600">{user.skills}</td>
-                <td className="p-3 text-gray-600">
-                  {user.resume ? (
-                    <a href={user.resume} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
-                      Download Resume
-                    </a>
-                  ) : (
-                    <span className="text-gray-400">No Resume</span>
-                  )}
-                </td>
-                <td className="p-3">
-                  <button
-                    onClick={() => handleDeleteRow(user.id)}
-                    className="px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700 transition"
-                  >
-                    Delete
-                  </button>
-                </td>
+            {filteredSkills.length === 0 ? (
+              <tr>
+                <td colSpan="7" className="p-3 text-center text-gray-600">No results found.</td>
               </tr>
-            ))}
+            ) : (
+              filteredSkills.map((user) => (
+                <tr key={user.id} className="border-b hover:bg-gray-50">
+                  <td className="p-3 font-medium text-gray-700">{user.name}</td>
+                  <td className="p-3 text-gray-600">{user.address}</td>
+                  <td className="p-3 text-gray-600">{user.email}</td>
+                  <td className="p-3 text-gray-600">{new Date(user.date_of_birth).toLocaleDateString()}</td>
+                  <td className="p-3 text-gray-600">{user.skills}</td>
+                  <td className="p-3 text-gray-600">
+                    {user.resume ? (
+                      <a href={user.resume} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
+                        Download Resume
+                      </a>
+                    ) : (
+                      <span className="text-gray-400">No Resume</span>
+                    )}
+                  </td>
+                  <td className="p-3">
+                    <button
+                      onClick={() => handleDeleteRow(user.id)}
+                      className="px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700 transition"
+                    >
+                      Delete
+                    </button>
+                  </td>
+                </tr>
+              ))
+            )}
           </tbody>
         </table>
       </div>
