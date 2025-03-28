@@ -43,20 +43,25 @@ const SkillsDirectoryDashboard = () => {
   // Delete entire skills record
   const handleDeleteRow = async (recordId) => {
     if (!window.confirm("Are you sure you want to delete this skills record?")) return;
-
+  
     try {
       const token = localStorage.getItem("token");
+      console.log("Token used for deletion:", token);
+      if (!token) {
+        alert("No token found. Please log in again.");
+        return;
+      }
+      
       await axios.delete(`${API_BASE_URL}/skills-directory/${recordId}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       alert("Skills record deleted successfully!");
-      // Remove deleted record from state
       setSkills(prevSkills => prevSkills.filter(record => record.id !== recordId));
     } catch (error) {
       console.error("❌ Error deleting skills record:", error.response?.data || error.message);
       alert("Failed to delete skills record.");
     }
-  };
+  };  
 
   return (
     <div className="p-8 bg-white min-h-screen">
