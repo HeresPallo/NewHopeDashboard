@@ -10,12 +10,15 @@ const SkillsDirectoryDashboard = () => {
   const navigate = useNavigate();
   const [skills, setSkills] = useState([]);
 
-  // Fetch skills on component mount
   useEffect(() => {
+    fetchSkills();
+  }, []);
+
+  const fetchSkills = () => {
     axios.get(`${API_BASE_URL}/skills-directory`)
       .then(response => setSkills(response.data))
       .catch(error => console.error("❌ Error fetching skills:", error));
-  }, []);
+  };
 
   // Export to Excel
   const handleExport = () => {
@@ -37,39 +40,34 @@ const SkillsDirectoryDashboard = () => {
     saveAs(dataBlob, "SkillsDirectory.xlsx");
   };
 
-  // Delete resume for a specific record
-  const handleDeleteResume = async (recordId) => {
-    if (!window.confirm("Are you sure you want to delete the resume for this record?")) return;
+  // Delete entire skills record
+  const handleDeleteRow = async (recordId) => {
+    if (!window.confirm("Are you sure you want to delete this skills record?")) return;
 
     try {
       const token = localStorage.getItem("token");
-      await axios.delete(`${API_BASE_URL}/skills-directory/resume/${recordId}`, {
+      await axios.delete(`${API_BASE_URL}/skills-directory/${recordId}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      alert("Resume deleted successfully!");
-
-      // Update state to remove the resume URL from the specific record
-      setSkills((prevSkills) =>
-        prevSkills.map((record) =>
-          record.id === recordId ? { ...record, resume: null } : record
-        )
-      );
+      alert("Skills record deleted successfully!");
+      // Remove deleted record from state
+      setSkills(prevSkills => prevSkills.filter(record => record.id !== recordId));
     } catch (error) {
-      console.error("❌ Error deleting resume:", error.response?.data || error.message);
-      alert("Failed to delete resume.");
+      console.error("❌ Error deleting skills record:", error.response?.data || error.message);
+      alert("Failed to delete skills record.");
     }
   };
 
   return (
     <div className="p-8 bg-white min-h-screen">
-      {/* Back Button */}
+      {/* 🔙 Back Button */}
       <button onClick={() => navigate(-1)} className="mb-4 px-4 py-2 text-blue-600 hover:underline">
         ← Back
       </button>
 
       <h2 className="text-2xl font-bold mb-6">Skills Directory</h2>
 
-      {/* Skills Table */}
+      {/* 📄 Skills Table */}
       <div className="overflow-x-auto">
         <table className="w-full border-collapse text-sm">
           <thead>
@@ -80,6 +78,7 @@ const SkillsDirectoryDashboard = () => {
               <th className="p-3 text-left">Date of Birth</th>
               <th className="p-3 text-left">Skills</th>
               <th className="p-3 text-left">Resume</th>
+              <th className="p-3 text-left">Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -92,20 +91,20 @@ const SkillsDirectoryDashboard = () => {
                 <td className="p-3 text-gray-600">{user.skills}</td>
                 <td className="p-3 text-gray-600">
                   {user.resume ? (
-                    <div className="flex flex-col gap-1">
-                      <a href={user.resume} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
-                        Download Resume
-                      </a>
-                      <button 
-                        onClick={() => handleDeleteResume(user.id)} 
-                        className="text-red-600 hover:underline text-sm"
-                      >
-                        Delete Resume
-                      </button>
-                    </div>
+                    <a href={user.resume} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
+                      Download Resume
+                    </a>
                   ) : (
                     <span className="text-gray-400">No Resume</span>
                   )}
+                </td>
+                <td className="p-3">
+                  <button
+                    onClick={() => handleDeleteRow(user.id)}
+                    className="px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700 transition"
+                  >
+                    Delete
+                  </button>
                 </td>
               </tr>
             ))}
@@ -113,7 +112,7 @@ const SkillsDirectoryDashboard = () => {
         </table>
       </div>
 
-      {/* Export Button */}
+      {/* 📤 Export Button */}
       <button
         onClick={handleExport}
         className="mt-6 px-5 py-2 bg-green-600 text-white font-semibold rounded-md hover:bg-green-700 transition"
