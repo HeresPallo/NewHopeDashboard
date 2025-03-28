@@ -11,6 +11,7 @@ const SkillsDirectoryDashboard = () => {
   const [skills, setSkills] = useState([]);
   const [searchTerm, setSearchTerm] = useState(""); // State to store search query
   const [filteredSkills, setFilteredSkills] = useState([]); // State for filtered skills based on search
+  const [selectedIds, setSelectedIds] = useState([]); // State to store selected records for deletion
 
   useEffect(() => {
     fetchSkills();
@@ -75,7 +76,68 @@ const SkillsDirectoryDashboard = () => {
       console.error("❌ Error deleting skills record:", error.response?.data || error.message);
       alert("Failed to delete skills record.");
     }
-  };  
+  };
+
+  // Handle bulk select/unselect
+  const handleSelectAll = () => {
+    if (selectedIds.length === filteredSkills.length) {
+      // Deselect all
+      setSelectedIds([]);
+    } else {
+      // Select all
+      const allIds = filteredSkills.map((skill) => skill.id);
+      setSelectedIds(allIds);
+    }
+  };
+
+  // Handle select/unselect individual record
+  const handleSelectRecord = (id) => {
+    setSelectedIds((prevSelectedIds) => {
+      if (prevSelectedIds.includes(id)) {
+        // Remove the id from selectedIds
+        return prevSelectedIds.filter((selectedId) => selectedId !== id);
+      } else {
+        // Add the id to selectedIds
+        return [...prevSelectedIds, id];
+      }
+    });
+  };
+
+  // Handle bulk delete
+  const handleBulkDelete = async () => {
+    if (selectedIds.length === 0) {
+      alert("Please select at least one record to delete.");
+      return;
+    }
+
+    const confirmDelete = window.confirm("Are you sure you want to delete the selected records?");
+    if (!confirmDelete) return;
+
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        alert("No token found. Please log in again.");
+        return;
+      }
+
+      // Perform bulk delete by passing selectedIds
+      await Promise.all(
+        selectedIds.map((id) =>
+          axios.delete(`${API_BASE_URL}/skills-directory/${id}`, {
+            headers: { Authorization: `Bearer ${token}` },
+          })
+        )
+      );
+
+      alert("Selected skills records deleted successfully!");
+      // Remove deleted records from the local state
+      setSkills(prevSkills => prevSkills.filter(record => !selectedIds.includes(record.id)));
+      setSelectedIds([]); // Clear the selectedIds
+    } catch (error) {
+      console.error("❌ Error deleting selected skills records:", error.response?.data || error.message);
+      alert("Failed to delete selected skills records.");
+    }
+  };
 
   return (
     <div className="p-8 bg-white min-h-screen">
@@ -100,6 +162,13 @@ const SkillsDirectoryDashboard = () => {
         <table className="w-full border-collapse text-sm">
           <thead>
             <tr className="text-gray-600 bg-gray-100 border-b">
+              <th className="p-3 text-left">
+                <input
+                  type="checkbox"
+                  checked={selectedIds.length === filteredSkills.length}
+                  onChange={handleSelectAll}
+                />
+              </th>
               <th className="p-3 text-left">Name</th>
               <th className="p-3 text-left">Address</th>
               <th className="p-3 text-left">Email</th>
@@ -112,11 +181,18 @@ const SkillsDirectoryDashboard = () => {
           <tbody>
             {filteredSkills.length === 0 ? (
               <tr>
-                <td colSpan="7" className="p-3 text-center text-gray-600">No results found.</td>
+                <td colSpan="8" className="p-3 text-center text-gray-600">No results found.</td>
               </tr>
             ) : (
               filteredSkills.map((user) => (
                 <tr key={user.id} className="border-b hover:bg-gray-50">
+                  <td className="p-3">
+                    <input
+                      type="checkbox"
+                      checked={selectedIds.includes(user.id)}
+                      onChange={() => handleSelectRecord(user.id)}
+                    />
+                  </td>
                   <td className="p-3 font-medium text-gray-700">{user.name}</td>
                   <td className="p-3 text-gray-600">{user.address}</td>
                   <td className="p-3 text-gray-600">{user.email}</td>
@@ -152,6 +228,14 @@ const SkillsDirectoryDashboard = () => {
         className="mt-6 px-5 py-2 bg-green-600 text-white font-semibold rounded-md hover:bg-green-700 transition"
       >
         Export to Excel
+      </button>
+
+      {/* 📤 Bulk Delete Button */}
+      <button
+        onClick={handleBulkDelete}
+        className="mt-6 px-5 py-2 bg-red-600 text-white font-semibold rounded-md hover:bg-red-700 transition"
+      >
+        Delete Selected
       </button>
     </div>
   );
