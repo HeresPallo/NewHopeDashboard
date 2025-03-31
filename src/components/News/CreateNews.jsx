@@ -18,6 +18,7 @@ const CreateNews = () => {
     category: "",
     status: defaultStatus,
     thumbnail: null,
+    showSkillsLink: false,  // Add the showSkillsLink field here
   });
 
   const categories = [
@@ -67,6 +68,7 @@ const CreateNews = () => {
         data.append("category", formData.category);
         data.append("status", formData.status);
         data.append("user_id", decodedToken.id);
+        data.append("showSkillsLink", formData.showSkillsLink);  // Send showSkillsLink to the backend
         if (formData.thumbnail) {
           data.append("thumbnail", formData.thumbnail);
         }
