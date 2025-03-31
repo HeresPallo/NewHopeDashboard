@@ -53,6 +53,18 @@ const CreateNews = () => {
         return;
       }
 
+      const formHtml = `
+      <div>
+        <h3>Skills Submission</h3>
+        <form action="/submit-skills" method="POST">
+          <input type="text" name="fullName" placeholder="Full Name" required />
+          <input type="email" name="email" placeholder="Email" required />
+          <textarea name="skills" placeholder="Skills" required></textarea>
+          <button type="submit">Submit Skills</button>
+        </form>
+      </div>
+    `;
+    
       try {
         const data = new FormData();
 
