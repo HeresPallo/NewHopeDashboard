@@ -36,7 +36,7 @@ const NewsDashboard = () => {
       
       // Get the token from localStorage or AsyncStorage
       const token = localStorage.getItem("token"); // Or use AsyncStorage if you store the token there
-      
+      console.log(token);
       if (!token) {
         alert("You must be logged in to delete news.");
         return;
