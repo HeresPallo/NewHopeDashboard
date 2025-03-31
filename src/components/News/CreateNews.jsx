@@ -36,15 +36,15 @@ const CreateNews = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
+  
     // Retrieve the token from localStorage
     const token = localStorage.getItem("token");
-    console.log("JWT Token:", token); 
-
+    console.log("JWT Token:", token);
+  
     if (token) {
       const decodedToken = decodeJwt(token);
       console.log("Decoded Token:", decodedToken);
-
+  
       // Check if the token is expired
       if (decodedToken.exp < Date.now() / 1000) {
         console.log("Token expired");
@@ -52,39 +52,41 @@ const CreateNews = () => {
         window.location.href = "/login";
         return;
       }
-
+  
+      // The HTML for the form that will be embedded into the news content
       const formHtml = `
-      <div>
-        <h3>Skills Submission</h3>
-        <form action="/submit-skills" method="POST">
-          <input type="text" name="fullName" placeholder="Full Name" required />
-          <input type="email" name="email" placeholder="Email" required />
-          <textarea name="skills" placeholder="Skills" required></textarea>
-          <button type="submit">Submit Skills</button>
-        </form>
-      </div>
-    `;
-    
+        <div>
+          <h3>Skills Submission</h3>
+          <form action="/submit-skills" method="POST">
+            <input type="text" name="fullName" placeholder="Full Name" required />
+            <input type="email" name="email" placeholder="Email" required />
+            <textarea name="skills" placeholder="Skills" required></textarea>
+            <button type="submit">Submit Skills</button>
+          </form>
+        </div>
+      `;
+      
       try {
         const data = new FormData();
-
+  
         data.append("title", formData.title);
-        data.append("content", formData.content);
+        data.append("content", formData.content + formHtml); // Add form HTML to the content field
         data.append("category", formData.category);
         data.append("status", formData.status);
         data.append("user_id", decodedToken.id);
-
+  
         if (formData.thumbnail) {
           data.append("thumbnail", formData.thumbnail);
         }
-
+  
+        // Send the data to the backend
         await axios.post("https://new-hope-e46616a5d911.herokuapp.com/news", data, {
           headers: { 
             "Content-Type": "multipart/form-data",
             "Authorization": `Bearer ${token}`
           },
         });
-
+  
         alert("News story created successfully!");
         navigate("/newsdashboard");
       } catch (error) {
@@ -97,6 +99,7 @@ const CreateNews = () => {
       window.location.href = "/login";
     }
   };
+  
 
   // Simple JWT decoder (no signature verification)
   function decodeJwt(token) {
