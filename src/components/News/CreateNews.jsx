@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
@@ -20,7 +20,13 @@ const CreateNews = () => {
     thumbnail: null,
   });
 
-  const categories = ["Presidential Campaign", "Health", "Education", "Environment", "Elderly Care", "Labor", "Technology", "Political Support"];
+  const categories = [
+    "Art", "Business", "Culture", "Education",
+    "Economy", "Elderly Care", "Entertainment", "Environment",
+    "Health", "Labor", "Local News", "Other",
+    "Political Support", "Presidential Campaign", "Science", "Social Issues",
+    "Sports", "Technology", "Transportation", "Youth"
+  ];
   const statuses = ["admin", "user"];
 
   const handleChange = (e) => {
@@ -33,23 +39,9 @@ const CreateNews = () => {
     setFormData((prevState) => ({ ...prevState, thumbnail: file }));
   };
 
-  // Insert the form HTML into the news content
-  const handleInsertForm = () => {
-    const formHtml = `
-      <div>
-        <h3>Skills Submission</h3>
-        <form action="/submit-skills" method="POST">
-          <input type="text" name="fullName" placeholder="Full Name" required />
-          <input type="email" name="email" placeholder="Email" required />
-          <textarea name="skills" placeholder="Skills" required></textarea>
-          <button type="submit">Submit Skills</button>
-        </form>
-      </div>
-    `;
-    setFormData((prevData) => ({
-      ...prevData,
-      content: prevData.content + formHtml, // Append the form to the content
-    }));
+  // Function to navigate to SubmitSkillsScreen when clicked
+  const handleGoToSubmitSkills = () => {
+    navigate("/submit-skills"); // Ensure this matches your route setup for SubmitSkillsScreen
   };
 
   const handleSubmit = async (e) => {
@@ -75,7 +67,7 @@ const CreateNews = () => {
           data.append("thumbnail", formData.thumbnail);
         }
 
-        await axios.post("https://new-hope-e46616a5d911.herokuapp.com/news", data, {
+        const response = await axios.post("https://new-hope-e46616a5d911.herokuapp.com/news", data, {
           headers: {
             "Content-Type": "multipart/form-data",
             "Authorization": `Bearer ${token}`,
@@ -138,16 +130,18 @@ const CreateNews = () => {
             ></textarea>
           </div>
 
-          {/* Button to insert Skills Submission Form */}
-          <div>
-            <button
-              type="button"
-              onClick={handleInsertForm}
-              className="w-full py-3 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-md"
-            >
-              Add Skills Submission Form
-            </button>
-          </div>
+          {/* Button to navigate to Submit Skills Screen */}
+          {formData.status === "admin" && (
+            <div>
+              <button
+                type="button"
+                onClick={handleGoToSubmitSkills}
+                className="w-full py-3 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-md"
+              >
+                Add Skills Submission Form
+              </button>
+            </div>
+          )}
 
           {/* Category */}
           <div>
