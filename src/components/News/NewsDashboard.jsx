@@ -26,7 +26,6 @@ const NewsDashboard = () => {
     });
   };
 
-  // Handle bulk delete of selected news
   const handleBulkDelete = async () => {
     try {
       if (selectedNews.length === 0) {
@@ -34,28 +33,25 @@ const NewsDashboard = () => {
         return;
       }
       
-      // Get the token from localStorage or AsyncStorage
-      const token = localStorage.getItem("token"); // Or use AsyncStorage if you store the token there
-      console.log(token);
+      const token = localStorage.getItem("token"); // Or use AsyncStorage if you're storing it there
       if (!token) {
         alert("You must be logged in to delete news.");
         return;
       }
   
-      // Ensure that selectedNews is an array of integers (IDs of the news stories)
-      const idsToDelete = selectedNews.map(id => parseInt(id, 10));  // Convert to integers if necessary
-      
+      const idsToDelete = selectedNews.map(id => parseInt(id, 10));  // Ensure IDs are integers
+  
       const response = await axios.delete("https://new-hope-e46616a5d911.herokuapp.com/news/bulk", {
         headers: {
           Authorization: `Bearer ${token}` // Add the token to the authorization header
         },
-        data: { ids: idsToDelete }
+        data: { ids: idsToDelete }  // Pass the IDs to delete
       });
   
       alert(response.data.message);
   
-      // After successful deletion, update the UI by fetching the news again
-      setNews((prevNews) => prevNews.filter((story) => !selectedNews.includes(story.id)));
+      // After successful deletion, update the UI by fetching the news again or removing from state
+      setNews(prevNews => prevNews.filter((story) => !selectedNews.includes(story.id)));
       setSelectedNews([]); // Clear selected news
     } catch (error) {
       console.error("Error deleting selected news:", error);
