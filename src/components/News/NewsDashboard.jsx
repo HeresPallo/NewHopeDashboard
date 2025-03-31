@@ -41,12 +41,15 @@ const NewsDashboard = () => {
         alert("You must be logged in to delete news.");
         return;
       }
+  
+      // Ensure that selectedNews is an array of integers (IDs of the news stories)
+      const idsToDelete = selectedNews.map(id => parseInt(id, 10));  // Convert to integers if necessary
       
       const response = await axios.delete("https://new-hope-e46616a5d911.herokuapp.com/news/bulk", {
         headers: {
           Authorization: `Bearer ${token}` // Add the token to the authorization header
         },
-        data: { ids: selectedNews }
+        data: { ids: idsToDelete }
       });
   
       alert(response.data.message);
@@ -58,8 +61,7 @@ const NewsDashboard = () => {
       console.error("Error deleting selected news:", error);
       alert("Failed to delete selected news.");
     }
-  };
-  
+  };  
 
   return (
     <div className="flex flex-col p-8 bg-white min-h-screen">
