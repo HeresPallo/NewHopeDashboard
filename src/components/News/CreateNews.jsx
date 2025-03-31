@@ -1,13 +1,13 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
+// Your existing form state code
 const CreateNews = () => {
   const navigate = useNavigate();
-
-  // Retrieve the token from localStorage
   const token = localStorage.getItem("token");
   let defaultStatus = "user";
+  
   if (token) {
     const decodedToken = decodeJwt(token);
     defaultStatus = decodedToken && decodedToken.role === "admin" ? "admin" : "user";
@@ -17,14 +17,16 @@ const CreateNews = () => {
     title: "",
     content: "",
     category: "",
-    status: defaultStatus, // Set default status based on user's role
+    status: defaultStatus,
     thumbnail: null,
   });
 
+  // Define categories and statuses
   const categories = ["Presidential Campaign", "Health", "Education", "Environment", "Elderly Care", "Labor", "Technology", "Political Support"];
   const statuses = ["admin", "user"];
 
-  const handleChange = (e) => {
+  // Add the Skills Submission Form HTML in the content
+  const handleFormChange = (e) => {
     const { name, value } = e.target;
     setFormData((prevState) => ({ ...prevState, [name]: value }));
   };
@@ -34,26 +36,18 @@ const CreateNews = () => {
     setFormData((prevState) => ({ ...prevState, thumbnail: file }));
   };
 
+  // Add Skills Submission Form to news content when admin submits
   const handleSubmit = async (e) => {
     e.preventDefault();
-  
-    // Retrieve the token from localStorage
     const token = localStorage.getItem("token");
-    console.log("JWT Token:", token);
-  
     if (token) {
       const decodedToken = decodeJwt(token);
-      console.log("Decoded Token:", decodedToken);
-  
-      // Check if the token is expired
       if (decodedToken.exp < Date.now() / 1000) {
-        console.log("Token expired");
         alert("Your session has expired. Please log in again.");
         window.location.href = "/login";
         return;
       }
-  
-      // The HTML for the form that will be embedded into the news content
+
       const formHtml = `
         <div>
           <h3>Skills Submission</h3>
@@ -65,43 +59,38 @@ const CreateNews = () => {
           </form>
         </div>
       `;
-      
+
       try {
         const data = new FormData();
-  
         data.append("title", formData.title);
-        data.append("content", formData.content + formHtml); // Add form HTML to the content field
+        data.append("content", formData.content + formHtml); // Add form HTML to the content
         data.append("category", formData.category);
         data.append("status", formData.status);
         data.append("user_id", decodedToken.id);
-  
         if (formData.thumbnail) {
           data.append("thumbnail", formData.thumbnail);
         }
-  
-        // Send the data to the backend
+
         await axios.post("https://new-hope-e46616a5d911.herokuapp.com/news", data, {
-          headers: { 
+          headers: {
             "Content-Type": "multipart/form-data",
-            "Authorization": `Bearer ${token}`
+            "Authorization": `Bearer ${token}`,
           },
         });
-  
+
         alert("News story created successfully!");
         navigate("/newsdashboard");
       } catch (error) {
-        console.error("❌ Error creating news story:", error.response?.data || error.message);
+        console.error("Error creating news story:", error.response?.data || error.message);
         alert(`Failed to create news: ${error.response?.data?.error || "Unknown Error"}`);
       }
     } else {
-      console.log("No token found");
       alert("You need to be logged in to create news.");
       window.location.href = "/login";
     }
   };
-  
 
-  // Simple JWT decoder (no signature verification)
+  // Decode JWT token
   function decodeJwt(token) {
     try {
       const payload = token.split('.')[1];
@@ -120,27 +109,26 @@ const CreateNews = () => {
         <h2 className="text-4xl font-bold text-gray-900 text-center mb-6">Create News Story</h2>
 
         <form onSubmit={handleSubmit} className="space-y-6">
-          
           {/* Title */}
           <div>
             <label className="block text-gray-700 font-semibold">Post Title</label>
-            <input 
-              type="text" 
-              name="title" 
-              onChange={handleChange} 
-              value={formData.title} 
+            <input
+              type="text"
+              name="title"
+              onChange={handleFormChange}
+              value={formData.title}
               className="w-full p-3 rounded-md border focus:outline-none focus:ring-2 focus:ring-red-500"
-              required 
+              required
             />
           </div>
 
           {/* Content */}
           <div>
             <label className="block text-gray-700 font-semibold">Post Content</label>
-            <textarea 
-              name="content" 
-              onChange={handleChange} 
-              value={formData.content} 
+            <textarea
+              name="content"
+              onChange={handleFormChange}
+              value={formData.content}
               className="w-full p-3 rounded-md border focus:outline-none focus:ring-2 focus:ring-red-500 h-32"
               required
             ></textarea>
@@ -149,10 +137,10 @@ const CreateNews = () => {
           {/* Category */}
           <div>
             <label className="block text-gray-700 font-semibold">Category</label>
-            <select 
-              name="category" 
-              onChange={handleChange} 
-              value={formData.category} 
+            <select
+              name="category"
+              onChange={handleFormChange}
+              value={formData.category}
               className="w-full p-3 rounded-md border focus:outline-none focus:ring-2 focus:ring-red-500"
               required
             >
@@ -166,10 +154,10 @@ const CreateNews = () => {
           {/* Status */}
           <div>
             <label className="block text-gray-700 font-semibold">Status</label>
-            <select 
-              name="status" 
-              onChange={handleChange} 
-              value={formData.status} 
+            <select
+              name="status"
+              onChange={handleFormChange}
+              value={formData.status}
               className="w-full p-3 rounded-md border focus:outline-none focus:ring-2 focus:ring-red-500"
               required
             >
@@ -182,16 +170,16 @@ const CreateNews = () => {
           {/* Upload Thumbnail */}
           <div>
             <label className="block text-gray-700 font-semibold">Upload Thumbnail</label>
-            <input 
-              type="file" 
-              onChange={handleFileChange} 
+            <input
+              type="file"
+              onChange={handleFileChange}
               className="w-full p-2 border rounded-md focus:outline-none file:mr-4 file:py-2 file:px-4 file:rounded file:bg-red-100 file:text-red-600 hover:file:bg-red-200"
             />
           </div>
 
           {/* Submit Button */}
-          <button 
-            type="submit" 
+          <button
+            type="submit"
             className="w-full py-3 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-md transition-all"
           >
             Create News
