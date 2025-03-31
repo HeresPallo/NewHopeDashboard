@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
-// Your existing form state code
 const CreateNews = () => {
   const navigate = useNavigate();
   const token = localStorage.getItem("token");
@@ -21,12 +20,10 @@ const CreateNews = () => {
     thumbnail: null,
   });
 
-  // Define categories and statuses
   const categories = ["Presidential Campaign", "Health", "Education", "Environment", "Elderly Care", "Labor", "Technology", "Political Support"];
   const statuses = ["admin", "user"];
 
-  // Add the Skills Submission Form HTML in the content
-  const handleFormChange = (e) => {
+  const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prevState) => ({ ...prevState, [name]: value }));
   };
@@ -36,9 +33,28 @@ const CreateNews = () => {
     setFormData((prevState) => ({ ...prevState, thumbnail: file }));
   };
 
-  // Add Skills Submission Form to news content when admin submits
+  // Insert the form HTML into the news content
+  const handleInsertForm = () => {
+    const formHtml = `
+      <div>
+        <h3>Skills Submission</h3>
+        <form action="/submit-skills" method="POST">
+          <input type="text" name="fullName" placeholder="Full Name" required />
+          <input type="email" name="email" placeholder="Email" required />
+          <textarea name="skills" placeholder="Skills" required></textarea>
+          <button type="submit">Submit Skills</button>
+        </form>
+      </div>
+    `;
+    setFormData((prevData) => ({
+      ...prevData,
+      content: prevData.content + formHtml, // Append the form to the content
+    }));
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+
     const token = localStorage.getItem("token");
     if (token) {
       const decodedToken = decodeJwt(token);
@@ -48,22 +64,10 @@ const CreateNews = () => {
         return;
       }
 
-      const formHtml = `
-        <div>
-          <h3>Skills Submission</h3>
-          <form action="/submit-skills" method="POST">
-            <input type="text" name="fullName" placeholder="Full Name" required />
-            <input type="email" name="email" placeholder="Email" required />
-            <textarea name="skills" placeholder="Skills" required></textarea>
-            <button type="submit">Submit Skills</button>
-          </form>
-        </div>
-      `;
-
       try {
         const data = new FormData();
         data.append("title", formData.title);
-        data.append("content", formData.content + formHtml); // Add form HTML to the content
+        data.append("content", formData.content);  // Inserted form as part of content
         data.append("category", formData.category);
         data.append("status", formData.status);
         data.append("user_id", decodedToken.id);
@@ -90,7 +94,7 @@ const CreateNews = () => {
     }
   };
 
-  // Decode JWT token
+  // Simple JWT decoder
   function decodeJwt(token) {
     try {
       const payload = token.split('.')[1];
@@ -115,7 +119,7 @@ const CreateNews = () => {
             <input
               type="text"
               name="title"
-              onChange={handleFormChange}
+              onChange={handleChange}
               value={formData.title}
               className="w-full p-3 rounded-md border focus:outline-none focus:ring-2 focus:ring-red-500"
               required
@@ -127,11 +131,22 @@ const CreateNews = () => {
             <label className="block text-gray-700 font-semibold">Post Content</label>
             <textarea
               name="content"
-              onChange={handleFormChange}
+              onChange={handleChange}
               value={formData.content}
               className="w-full p-3 rounded-md border focus:outline-none focus:ring-2 focus:ring-red-500 h-32"
               required
             ></textarea>
+          </div>
+
+          {/* Button to insert Skills Submission Form */}
+          <div>
+            <button
+              type="button"
+              onClick={handleInsertForm}
+              className="w-full py-3 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-md"
+            >
+              Add Skills Submission Form
+            </button>
           </div>
 
           {/* Category */}
@@ -139,7 +154,7 @@ const CreateNews = () => {
             <label className="block text-gray-700 font-semibold">Category</label>
             <select
               name="category"
-              onChange={handleFormChange}
+              onChange={handleChange}
               value={formData.category}
               className="w-full p-3 rounded-md border focus:outline-none focus:ring-2 focus:ring-red-500"
               required
@@ -156,7 +171,7 @@ const CreateNews = () => {
             <label className="block text-gray-700 font-semibold">Status</label>
             <select
               name="status"
-              onChange={handleFormChange}
+              onChange={handleChange}
               value={formData.status}
               className="w-full p-3 rounded-md border focus:outline-none focus:ring-2 focus:ring-red-500"
               required
