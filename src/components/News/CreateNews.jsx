@@ -6,7 +6,7 @@ const CreateNews = () => {
   const navigate = useNavigate();
   const token = localStorage.getItem("token");
   let defaultStatus = "user";
-  
+
   if (token) {
     const decodedToken = decodeJwt(token);
     defaultStatus = decodedToken && decodedToken.role === "admin" ? "admin" : "user";
@@ -39,9 +39,13 @@ const CreateNews = () => {
     setFormData((prevState) => ({ ...prevState, thumbnail: file }));
   };
 
-  // Function to navigate to SubmitSkillsScreen when clicked
-  const handleGoToSubmitSkills = () => {
-    navigate("/submit-skills"); // Ensure this matches your route setup for SubmitSkillsScreen
+  // Insert the link to the SubmitSkillsScreen into the content
+  const handleInsertLink = () => {
+    const submitSkillsLink = `<a href="/submit-skills" target="_blank">Submit your skills here</a>`;
+    setFormData((prevData) => ({
+      ...prevData,
+      content: prevData.content + submitSkillsLink, // Add the link to the content
+    }));
   };
 
   const handleSubmit = async (e) => {
@@ -59,7 +63,7 @@ const CreateNews = () => {
       try {
         const data = new FormData();
         data.append("title", formData.title);
-        data.append("content", formData.content);  // Inserted form as part of content
+        data.append("content", formData.content);  // Inserted the link into content
         data.append("category", formData.category);
         data.append("status", formData.status);
         data.append("user_id", decodedToken.id);
@@ -130,15 +134,15 @@ const CreateNews = () => {
             ></textarea>
           </div>
 
-          {/* Button to navigate to Submit Skills Screen */}
+          {/* Button to insert SubmitSkills link */}
           {formData.status === "admin" && (
             <div>
               <button
                 type="button"
-                onClick={handleGoToSubmitSkills}
+                onClick={handleInsertLink}
                 className="w-full py-3 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-md"
               >
-                Add Skills Submission Form
+                Add Skills Submission Link
               </button>
             </div>
           )}
