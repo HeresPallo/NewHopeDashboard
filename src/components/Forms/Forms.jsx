@@ -12,7 +12,7 @@ const Forms = () => {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full max-w-5xl">
         {/* Card 1: Confirmation Journal */}
         <div className="p-6 bg-gray-50 rounded-xl shadow hover:shadow-lg transition cursor-pointer border"
-             onClick={() => navigate("/forms/confirmation-journal")}>
+             onClick={() => navigate("/forms/confirmation")}>
           <h2 className="text-2xl font-semibold text-gray-800 mb-4">
             Confirmation Journal
           </h2>
@@ -23,7 +23,7 @@ const Forms = () => {
         
         {/* Card 2: New Applicant Journal */}
         <div className="p-6 bg-gray-50 rounded-xl shadow hover:shadow-lg transition cursor-pointer border"
-             onClick={() => navigate("/forms/new-applicant-journal")}>
+             onClick={() => navigate("/forms/newapplicant")}>
           <h2 className="text-2xl font-semibold text-gray-800 mb-4">
             New Applicant Journal
           </h2>
@@ -34,7 +34,7 @@ const Forms = () => {
         
         {/* Card 3: Registration Rejection Form (RRF) */}
         <div className="p-6 bg-gray-50 rounded-xl shadow hover:shadow-lg transition cursor-pointer border"
-             onClick={() => navigate("/forms/registration-rejection-form")}>
+             onClick={() => navigate("/forms/rrf")}>
           <h2 className="text-2xl font-semibold text-gray-800 mb-4">
             Registration Rejection Form (RRF)
           </h2>
