@@ -59,6 +59,12 @@ const Sidebar = ({ setIsAuthenticated }) => {
             </li>
             <li>
               <div className="flex items-center p-2 text-gray-500 rounded-lg hover:text-white hover:bg-red-500 focus:bg-red-500 group-focus:bg-red-500">
+                <MdContactPhone />
+                <NavLink className="ms-3 text-black hover:text-white focus:text-black" to='/forms'>Forms</NavLink>
+              </div>
+            </li>
+            <li>
+              <div className="flex items-center p-2 text-gray-500 rounded-lg hover:text-white hover:bg-red-500 focus:bg-red-500 group-focus:bg-red-500">
                 <MdSettings />
                 <NavLink className="ms-3 text-black hover:text-white focus:text-black" to='/user-management'>Settings</NavLink>
               </div>

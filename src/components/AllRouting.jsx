@@ -1,5 +1,5 @@
 import React from 'react';
-import { Route, Routes, Navigate } from "react-router-dom";
+import { Route, Routes, Navigate, Form } from "react-router-dom";
 import { useEffect, useState } from "react";
 import NotFound from './NotFound/NotFound';
 import OverviewAdmin from "./Admin/OverviewAdmin";
@@ -28,6 +28,10 @@ import MessagesPage from "./Contacts/MessagesPage";
 import ViewSurvey from "./Contacts/ViewSurvey";
 import SkillsDirectoryDashboard from './Contacts/SkillsDirectoryDashboard';
 import UserManagementDashboard from './Settings/UserManagement';
+import Forms from './Forms/Forms';
+import ConfirmationJournalForm from './Forms/ConfirmationJournalForm';
+import NewApplicantJournalForm from './Forms/NewApplicantJournalForm';
+import RegistrationRejectionForm from './Forms/RegistrationRejectionForm';
 
 const AllRouting = () => {
     const [isAuthenticated, setIsAuthenticated] = useState(!!localStorage.getItem("token"));
@@ -77,6 +81,10 @@ const AllRouting = () => {
                             <Route path="/messages" element={<MessagesPage />} />
                             <Route path="/skills-directory" element={<SkillsDirectoryDashboard />} />
                             <Route path="/user-management" element={<UserManagementDashboard />} />
+                            <Route path="/forms" element={<Forms/>} />
+                            <Route path="/forms/confirmation" element={<ConfirmationJournalForm/>} />
+                            <Route path="/forms/newapplicant" element={<NewApplicantJournalForm/>} />
+                            <Route path="/forms/rrf" element={<RegistrationRejectionForm/>} />
                         </>
                     ) : (
                         <Route path="*" element={<Navigate to="/login" />} />
