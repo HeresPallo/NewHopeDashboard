@@ -1,5 +1,6 @@
 // src/pages/ConfirmationJournalForm.jsx
 import React, { useState } from "react";
+import * as XLSX from "xlsx";
 
 const ConfirmationJournalForm = () => {
   const [formData, setFormData] = useState({
@@ -32,6 +33,23 @@ const ConfirmationJournalForm = () => {
     e.preventDefault();
     // Send formData to backend
     console.log("Confirmation Journal Data:", formData);
+  };
+
+  // Export the form data as Excel (combining header info with each entry)
+  const exportToExcel = () => {
+    const exportData = formData.entries.map(entry => ({
+      district: formData.district,
+      centreName: formData.centreName,
+      centreCode: formData.centreCode,
+      name: entry.name,
+      confirmationNumber: entry.confirmationNumber,
+      telephone: entry.telephone,
+      confirmation_date: entry.date,
+    }));
+    const ws = XLSX.utils.json_to_sheet(exportData);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Confirmation Journal");
+    XLSX.writeFile(wb, "ConfirmationJournal.xlsx");
   };
 
   return (
@@ -126,20 +144,28 @@ const ConfirmationJournalForm = () => {
           </tbody>
         </table>
 
-        <button
-          type="button"
-          onClick={addRow}
-          className="mt-4 px-4 py-2 bg-blue-600 text-white rounded shadow"
-        >
-          Add Row
-        </button>
-
-        <button
-          type="submit"
-          className="mt-4 ml-4 px-4 py-2 bg-green-600 text-white rounded shadow"
-        >
-          Submit
-        </button>
+        <div className="mt-4 flex gap-4">
+          <button
+            type="button"
+            onClick={addRow}
+            className="px-4 py-2 bg-blue-600 text-white rounded shadow"
+          >
+            Add Row
+          </button>
+          <button
+            type="submit"
+            className="px-4 py-2 bg-green-600 text-white rounded shadow"
+          >
+            Submit
+          </button>
+          <button
+            type="button"
+            onClick={exportToExcel}
+            className="px-4 py-2 bg-purple-600 text-white rounded shadow"
+          >
+            Export Excel
+          </button>
+        </div>
       </form>
     </div>
   );

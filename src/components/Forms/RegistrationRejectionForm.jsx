@@ -1,5 +1,6 @@
 // src/pages/RegistrationRejectionForm.jsx
 import React, { useState } from "react";
+import * as XLSX from "xlsx";
 
 const RegistrationRejectionForm = () => {
   const [formData, setFormData] = useState({
@@ -23,6 +24,14 @@ const RegistrationRejectionForm = () => {
     e.preventDefault();
     // Send formData to backend
     console.log("Registration Rejection Form Data:", formData);
+  };
+
+  // Export the form data as Excel (exporting as a single-row array)
+  const exportToExcel = () => {
+    const ws = XLSX.utils.json_to_sheet([formData]);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "RRF Data");
+    XLSX.writeFile(wb, "RegistrationRejectionForm.xlsx");
   };
 
   return (
@@ -126,12 +135,21 @@ const RegistrationRejectionForm = () => {
           </div>
         </div>
 
-        <button
-          type="submit"
-          className="px-6 py-2 bg-green-600 text-white rounded shadow"
-        >
-          Submit
-        </button>
+        <div className="mt-4 flex gap-4">
+          <button
+            type="submit"
+            className="px-6 py-2 bg-green-600 text-white rounded shadow"
+          >
+            Submit
+          </button>
+          <button
+            type="button"
+            onClick={exportToExcel}
+            className="px-6 py-2 bg-purple-600 text-white rounded shadow"
+          >
+            Export Excel
+          </button>
+        </div>
       </form>
     </div>
   );

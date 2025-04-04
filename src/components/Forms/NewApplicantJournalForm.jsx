@@ -1,5 +1,6 @@
 // src/pages/NewApplicantJournalForm.jsx
 import React, { useState } from "react";
+import * as XLSX from "xlsx";
 
 const NewApplicantJournalForm = () => {
   const [formData, setFormData] = useState({
@@ -32,6 +33,24 @@ const NewApplicantJournalForm = () => {
     e.preventDefault();
     // Send formData to backend
     console.log("New Applicant Journal Data:", formData);
+  };
+
+  // Export the form data as Excel (merging header details with each entry)
+  const exportToExcel = () => {
+    const exportData = formData.entries.map(entry => ({
+      district: formData.district,
+      centreName: formData.centreName,
+      centreCode: formData.centreCode,
+      name: entry.name,
+      confirmationNumber: entry.confirmationNumber,
+      viuReceiptNumber: entry.viuReceiptNumber,
+      telephone: entry.telephone,
+      confirmation_date: entry.date,
+    }));
+    const ws = XLSX.utils.json_to_sheet(exportData);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "New Applicant Journal");
+    XLSX.writeFile(wb, "NewApplicantJournal.xlsx");
   };
 
   return (
@@ -133,20 +152,28 @@ const NewApplicantJournalForm = () => {
           </tbody>
         </table>
 
-        <button
-          type="button"
-          onClick={addRow}
-          className="mt-4 px-4 py-2 bg-blue-600 text-white rounded shadow"
-        >
-          Add Row
-        </button>
-
-        <button
-          type="submit"
-          className="mt-4 ml-4 px-4 py-2 bg-green-600 text-white rounded shadow"
-        >
-          Submit
-        </button>
+        <div className="mt-4 flex gap-4">
+          <button
+            type="button"
+            onClick={addRow}
+            className="px-4 py-2 bg-blue-600 text-white rounded shadow"
+          >
+            Add Row
+          </button>
+          <button
+            type="submit"
+            className="px-4 py-2 bg-green-600 text-white rounded shadow"
+          >
+            Submit
+          </button>
+          <button
+            type="button"
+            onClick={exportToExcel}
+            className="px-4 py-2 bg-purple-600 text-white rounded shadow"
+          >
+            Export Excel
+          </button>
+        </div>
       </form>
     </div>
   );
