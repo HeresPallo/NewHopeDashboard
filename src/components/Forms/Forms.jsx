@@ -37,7 +37,7 @@ const Forms = () => {
   // Share handler: posts the share request (with password and mobile user selection) to your backend.
   const handleShareForm = (formName, sharePassword, selectedUserIds) => {
     axios
-      .post(`${API_BASE_URL}/api/shareForm`, { formName, sharePassword, userIds: selectedUserIds })
+      .post(`${API_BASE_URL}/shareForm`, { formName, sharePassword, userIds: selectedUserIds })
       .then((response) => {
         alert(`"${formName}" form successfully shared.`);
       })
