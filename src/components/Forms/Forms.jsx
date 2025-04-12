@@ -4,85 +4,11 @@ import { useNavigate } from "react-router-dom";
 import { Bar } from "react-chartjs-2";
 import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend } from "chart.js";
 import axios from "axios";
+import SharePasswordModal from "./SharePasswordModal";
 
 const API_BASE_URL = "https://new-hope-e46616a5d911.herokuapp.com";
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
-
-// Modal component using a dropdown to select mobile users.
-function ShareModalDropdown({ formName, onClose, onShare }) {
-  const [mobileUsers, setMobileUsers] = useState([]);
-  const [selectedUserIds, setSelectedUserIds] = useState([]);
-
-  useEffect(() => {
-    // Fetch mobile users from your backend API at /mobileusers.
-    axios.get(`${API_BASE_URL}/mobileusers`)
-  .then(response => {
-    const data = response.data;
-    if (Array.isArray(data)) {
-      setMobileUsers(data);
-    } else if (data && Array.isArray(data.users)) {
-      setMobileUsers(data.users);
-    } else {
-      console.error("API response is not in expected format:", data);
-      setMobileUsers([]);
-    }
-  })
-  .catch(error => {
-    console.error("Error fetching mobile users", error);
-  });
-  }, []);
-  
-
-  const handleSelectionChange = (e) => {
-    const options = e.target.options;
-    const selected = [];
-    for (let i = 0; i < options.length; i++) {
-      if (options[i].selected) {
-        selected.push(options[i].value);
-      }
-    }
-    setSelectedUserIds(selected);
-  };
-
-  return (
-    <div className="fixed top-0 left-0 w-full h-full flex items-center justify-center bg-black bg-opacity-50 z-50">
-      <div className="bg-white rounded-lg p-6 w-96">
-        <h2 className="text-xl font-bold mb-4">Share {formName}</h2>
-        <select
-          multiple
-          className="w-full h-40 border p-2"
-          value={selectedUserIds}
-          onChange={handleSelectionChange}
-        >
-          {mobileUsers.map(user => (
-            <option key={user.id} value={user.id}>
-              {user.name} (ID: {user.id})
-            </option>
-          ))}
-        </select>
-        <div className="flex justify-end mt-4">
-          <button className="px-4 py-2 bg-gray-300 rounded mr-2" onClick={onClose}>
-            Cancel
-          </button>
-          <button
-            className="px-4 py-2 bg-blue-600 text-white rounded"
-            onClick={() => {
-              if (selectedUserIds.length === 0) {
-                alert("Please select at least one user.");
-                return;
-              }
-              onShare(formName, selectedUserIds);
-              onClose();
-            }}
-          >
-            Share
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-}
 
 const Forms = () => {
   const navigate = useNavigate();
@@ -98,29 +24,30 @@ const Forms = () => {
 
   // Prepare data for the bar chart.
   const chartData = {
-    labels: formSubmissions.map(item => item.form),
+    labels: formSubmissions.map((item) => item.form),
     datasets: [
       {
         label: "Submissions",
-        data: formSubmissions.map(item => item.count),
-        backgroundColor: ["#FF6384", "#36A2EB", "#FFCE56"]
-      }
-    ]
+        data: formSubmissions.map((item) => item.count),
+        backgroundColor: ["#FF6384", "#36A2EB", "#FFCE56"],
+      },
+    ],
   };
 
-  // Posts the share request to your backend.
-  const handleShareForm = (formName, selectedUserIds) => {
-    axios.post(`${API_BASE_URL}/shareForm`, { formName, userIds: selectedUserIds })
-      .then(response => {
-        alert(`"${formName}" form successfully shared.`);
+  // Posts the share request (with password) to your backend.
+  const handleShareFormWithPassword = (formName, sharePassword) => {
+    axios
+      .post(`${API_BASE_URL}/api/shareForm`, { formName, sharePassword })
+      .then((response) => {
+        alert(`"${formName}" form successfully shared with password.`);
       })
-      .catch(error => {
+      .catch((error) => {
         console.error("Error sharing form:", error);
         alert("Error sharing form.");
       });
   };
 
-  // Opens the share modal for the specified form.
+  // Opens the share password modal for the specified form.
   const openShareModal = (formName, e) => {
     e.stopPropagation(); // Prevent card navigation.
     setCurrentFormToShare(formName);
@@ -213,10 +140,10 @@ const Forms = () => {
       </div>
       
       {shareModalOpen && (
-        <ShareModalDropdown
+        <SharePasswordModal
           formName={currentFormToShare}
           onClose={() => setShareModalOpen(false)}
-          onShare={handleShareForm}
+          onShare={handleShareFormWithPassword}
         />
       )}
     </div>
