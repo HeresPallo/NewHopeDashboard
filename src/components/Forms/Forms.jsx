@@ -37,7 +37,7 @@ const Forms = () => {
   // Posts the share request (with password) to your backend.
   const handleShareFormWithPassword = (formName, sharePassword) => {
     axios
-      .post(`${API_BASE_URL}/api/shareForm`, { formName, sharePassword })
+      .post(`${API_BASE_URL}/shareForm`, { formName, sharePassword })
       .then((response) => {
         alert(`"${formName}" form successfully shared with password.`);
       })
