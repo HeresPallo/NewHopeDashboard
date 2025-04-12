@@ -28,6 +28,18 @@ const Forms = () => {
     ]
   };
 
+  // Function to share a form with a user - accessible only to admin
+  const shareForm = (formName, e) => {
+    e.stopPropagation(); // Prevent triggering the card navigation
+    const userEmail = prompt(`Enter the email of the user to share the "${formName}" form with:`);
+    if (userEmail) {
+      // Replace this with your actual API call to share the form.
+      // For example: axios.post('/api/shareForm', { formName, userEmail })
+      console.log(`Shared ${formName} with ${userEmail}`);
+      alert(`"${formName}" form successfully shared with ${userEmail}`);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-white flex flex-col items-center p-6">
       <h1 className="text-4xl font-bold text-gray-900 mb-8">Forms Dashboard</h1>
@@ -50,8 +62,16 @@ const Forms = () => {
       {/* Card Section */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full max-w-5xl">
         {/* Card 1: Confirmation Journal */}
-        <div className="p-6 bg-gray-50 rounded-xl shadow hover:shadow-lg transition cursor-pointer border"
+        <div className="relative p-6 bg-gray-50 rounded-xl shadow hover:shadow-lg transition cursor-pointer border"
              onClick={() => navigate("/forms/confirmation")}>
+          <div className="absolute top-2 right-2">
+            <button
+              className="px-2 py-1 bg-green-500 text-white text-xs rounded"
+              onClick={(e) => shareForm("Confirmation Journal", e)}
+            >
+              Share
+            </button>
+          </div>
           <h2 className="text-2xl font-semibold text-gray-800 mb-4">
             Confirmation Journal
           </h2>
@@ -61,8 +81,16 @@ const Forms = () => {
         </div>
         
         {/* Card 2: New Applicant Journal */}
-        <div className="p-6 bg-gray-50 rounded-xl shadow hover:shadow-lg transition cursor-pointer border"
+        <div className="relative p-6 bg-gray-50 rounded-xl shadow hover:shadow-lg transition cursor-pointer border"
              onClick={() => navigate("/forms/newapplicant")}>
+          <div className="absolute top-2 right-2">
+            <button
+              className="px-2 py-1 bg-green-500 text-white text-xs rounded"
+              onClick={(e) => shareForm("New Applicant Journal", e)}
+            >
+              Share
+            </button>
+          </div>
           <h2 className="text-2xl font-semibold text-gray-800 mb-4">
             New Applicant Journal
           </h2>
@@ -72,8 +100,16 @@ const Forms = () => {
         </div>
         
         {/* Card 3: Registration Rejection Form (RRF) */}
-        <div className="p-6 bg-gray-50 rounded-xl shadow hover:shadow-lg transition cursor-pointer border"
+        <div className="relative p-6 bg-gray-50 rounded-xl shadow hover:shadow-lg transition cursor-pointer border"
              onClick={() => navigate("/forms/rrf")}>
+          <div className="absolute top-2 right-2">
+            <button
+              className="px-2 py-1 bg-green-500 text-white text-xs rounded"
+              onClick={(e) => shareForm("Registration Rejection Form (RRF)", e)}
+            >
+              Share
+            </button>
+          </div>
           <h2 className="text-2xl font-semibold text-gray-800 mb-4">
             Registration Rejection Form (RRF)
           </h2>
