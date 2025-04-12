@@ -13,10 +13,9 @@ function ShareModalDropdown({ formName, onClose, onShare }) {
   const [selectedUserIds, setSelectedUserIds] = useState([]);
 
   useEffect(() => {
-    // Fetch mobile users from your backend API.
-    axios.get("/api/mobileusers")
+    // Fetch mobile users from your backend API at /mobileusers.
+    axios.get("/mobileusers")
       .then(response => {
-        // Ensure that you get an array; adjust this based on your API response structure.
         const data = response.data;
         if (Array.isArray(data)) {
           setMobileUsers(data);
@@ -24,13 +23,14 @@ function ShareModalDropdown({ formName, onClose, onShare }) {
           setMobileUsers(data.users);
         } else {
           console.error("API response is not in expected format:", data);
-          setMobileUsers([]); // Fallback to an empty array
+          setMobileUsers([]);
         }
       })
       .catch(error => {
         console.error("Error fetching mobile users", error);
       });
   }, []);
+  
 
   const handleSelectionChange = (e) => {
     const options = e.target.options;
