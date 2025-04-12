@@ -5,6 +5,8 @@ import { Bar } from "react-chartjs-2";
 import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend } from "chart.js";
 import axios from "axios";
 
+const API_BASE_URL = "https://new-hope-e46616a5d911.herokuapp.com";
+
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
 // Modal component using a dropdown to select mobile users.
@@ -14,21 +16,21 @@ function ShareModalDropdown({ formName, onClose, onShare }) {
 
   useEffect(() => {
     // Fetch mobile users from your backend API at /mobileusers.
-    axios.get("/mobileusers")
-      .then(response => {
-        const data = response.data;
-        if (Array.isArray(data)) {
-          setMobileUsers(data);
-        } else if (data && Array.isArray(data.users)) {
-          setMobileUsers(data.users);
-        } else {
-          console.error("API response is not in expected format:", data);
-          setMobileUsers([]);
-        }
-      })
-      .catch(error => {
-        console.error("Error fetching mobile users", error);
-      });
+    axios.get(`${API_BASE_URL}/mobileusers`)
+  .then(response => {
+    const data = response.data;
+    if (Array.isArray(data)) {
+      setMobileUsers(data);
+    } else if (data && Array.isArray(data.users)) {
+      setMobileUsers(data.users);
+    } else {
+      console.error("API response is not in expected format:", data);
+      setMobileUsers([]);
+    }
+  })
+  .catch(error => {
+    console.error("Error fetching mobile users", error);
+  });
   }, []);
   
 
@@ -108,7 +110,7 @@ const Forms = () => {
 
   // Posts the share request to your backend.
   const handleShareForm = (formName, selectedUserIds) => {
-    axios.post("/api/shareForm", { formName, userIds: selectedUserIds })
+    axios.post(`${API_BASE_URL}/shareForm`, { formName, userIds: selectedUserIds })
       .then(response => {
         alert(`"${formName}" form successfully shared.`);
       })
