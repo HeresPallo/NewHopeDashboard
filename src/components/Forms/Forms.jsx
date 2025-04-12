@@ -7,16 +7,25 @@ import axios from "axios";
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
-// Modal component that uses a dropdown to select mobile users.
+// Modal component using a dropdown to select mobile users.
 function ShareModalDropdown({ formName, onClose, onShare }) {
   const [mobileUsers, setMobileUsers] = useState([]);
   const [selectedUserIds, setSelectedUserIds] = useState([]);
 
   useEffect(() => {
-    // Fetch mobile users from the backend API endpoint.
+    // Fetch mobile users from your backend API.
     axios.get("/api/mobileusers")
       .then(response => {
-        setMobileUsers(response.data);
+        // Ensure that you get an array; adjust this based on your API response structure.
+        const data = response.data;
+        if (Array.isArray(data)) {
+          setMobileUsers(data);
+        } else if (data && Array.isArray(data.users)) {
+          setMobileUsers(data.users);
+        } else {
+          console.error("API response is not in expected format:", data);
+          setMobileUsers([]); // Fallback to an empty array
+        }
       })
       .catch(error => {
         console.error("Error fetching mobile users", error);
@@ -97,7 +106,7 @@ const Forms = () => {
     ]
   };
 
-  // This function posts the share request to your backend.
+  // Posts the share request to your backend.
   const handleShareForm = (formName, selectedUserIds) => {
     axios.post("/api/shareForm", { formName, userIds: selectedUserIds })
       .then(response => {
