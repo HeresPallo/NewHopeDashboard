@@ -1,10 +1,10 @@
 // src/pages/Forms.jsx
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Bar } from "react-chartjs-2";
 import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend } from "chart.js";
 import axios from "axios";
-import SharePasswordModal from "./SharePasswordModal";
+import ShareFormModal from "./ShareFormModal";
 
 const API_BASE_URL = "https://new-hope-e46616a5d911.herokuapp.com";
 
@@ -19,7 +19,7 @@ const Forms = () => {
   const formSubmissions = [
     { form: "Confirmation Journal", count: 25 },
     { form: "New Applicant Journal", count: 15 },
-    { form: "Registration Rejection Form (RRF)", count: 10 }
+    { form: "Registration Rejection Form (RRF)", count: 10 },
   ];
 
   // Prepare data for the bar chart.
@@ -34,12 +34,12 @@ const Forms = () => {
     ],
   };
 
-  // Posts the share request (with password) to your backend.
-  const handleShareFormWithPassword = (formName, sharePassword) => {
+  // Share handler: posts the share request (with password and mobile user selection) to your backend.
+  const handleShareForm = (formName, sharePassword, selectedUserIds) => {
     axios
-      .post(`${API_BASE_URL}/shareForm`, { formName, sharePassword })
+      .post(`${API_BASE_URL}/api/shareForm`, { formName, sharePassword, userIds: selectedUserIds })
       .then((response) => {
-        alert(`"${formName}" form successfully shared with password.`);
+        alert(`"${formName}" form successfully shared.`);
       })
       .catch((error) => {
         console.error("Error sharing form:", error);
@@ -47,7 +47,7 @@ const Forms = () => {
       });
   };
 
-  // Opens the share password modal for the specified form.
+  // Opens the share modal for the specified form.
   const openShareModal = (formName, e) => {
     e.stopPropagation(); // Prevent card navigation.
     setCurrentFormToShare(formName);
@@ -61,15 +61,15 @@ const Forms = () => {
       {/* Graph Section */}
       <div className="w-full max-w-4xl mb-12">
         <h2 className="text-2xl font-semibold text-gray-800 mb-4">Form Submissions Overview</h2>
-        <Bar 
-          data={chartData} 
+        <Bar
+          data={chartData}
           options={{
             responsive: true,
             plugins: {
               legend: { position: "top" },
-              title: { display: true, text: "Form Submissions" }
-            }
-          }} 
+              title: { display: true, text: "Form Submissions" },
+            },
+          }}
         />
       </div>
 
@@ -139,11 +139,12 @@ const Forms = () => {
         </div>
       </div>
       
+      {/* Share Modal: Combines Mobile User Selection and Password Input */}
       {shareModalOpen && (
-        <SharePasswordModal
+        <ShareFormModal
           formName={currentFormToShare}
           onClose={() => setShareModalOpen(false)}
-          onShare={handleShareFormWithPassword}
+          onShare={handleShareForm}
         />
       )}
     </div>
