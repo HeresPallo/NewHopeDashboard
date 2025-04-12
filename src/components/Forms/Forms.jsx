@@ -14,7 +14,7 @@ function ShareModalDropdown({ formName, onClose, onShare }) {
 
   useEffect(() => {
     // Fetch mobile users from the backend API endpoint.
-    axios.get("/mobileusers")
+    axios.get("/api/mobileusers")
       .then(response => {
         setMobileUsers(response.data);
       })
@@ -99,7 +99,7 @@ const Forms = () => {
 
   // This function posts the share request to your backend.
   const handleShareForm = (formName, selectedUserIds) => {
-    axios.post("/shareForm", { formName, userIds: selectedUserIds })
+    axios.post("/api/shareForm", { formName, userIds: selectedUserIds })
       .then(response => {
         alert(`"${formName}" form successfully shared.`);
       })
