@@ -1,6 +1,7 @@
 // src/pages/ConfirmationJournalForm.jsx
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import * as XLSX from "xlsx";
 
 const API_BASE_URL = "https://new-hope-e46616a5d911.herokuapp.com";
 
@@ -9,9 +10,7 @@ const ConfirmationJournalForm = () => {
     district: "",
     centreName: "",
     centreCode: "",
-    entries: [
-      { name: "", confirmationNumber: "", telephone: "", date: "" },
-    ],
+    entries: [{ name: "", confirmationNumber: "", telephone: "", date: "" }],
   });
   
   // State for tracking submissions already saved in the database.
@@ -69,6 +68,19 @@ const ConfirmationJournalForm = () => {
       console.error("Error submitting confirmation journal:", error);
       alert("Error submitting form.");
     }
+  };
+
+  // Export the current submissions to an Excel file.
+  const exportToExcel = () => {
+    if (!submissions || submissions.length === 0) {
+      alert("No submissions available to export.");
+      return;
+    }
+    // Prepare data for export. For example, you can directly pass the submissions array.
+    const ws = XLSX.utils.json_to_sheet(submissions);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Confirmation Journal Submissions");
+    XLSX.writeFile(wb, "ConfirmationJournal_Submissions.xlsx");
   };
 
   return (
@@ -180,7 +192,7 @@ const ConfirmationJournalForm = () => {
         </div>
       </form>
 
-      {/* Submission Table */}
+      {/* Submissions Table */}
       <div className="w-full max-w-3xl mt-10">
         <h2 className="text-2xl font-semibold mb-4">Submitted Entries</h2>
         {loadingSubmissions ? (
@@ -188,41 +200,51 @@ const ConfirmationJournalForm = () => {
         ) : submissions.length === 0 ? (
           <p>No submissions yet.</p>
         ) : (
-          <table className="w-full text-left border">
-            <thead className="bg-gray-100">
-              <tr>
-                <th className="p-2 border">#</th>
-                <th className="p-2 border">District</th>
-                <th className="p-2 border">Centre Name</th>
-                <th className="p-2 border">Centre Code</th>
-                <th className="p-2 border">Entries</th>
-                <th className="p-2 border">Submitted At</th>
-              </tr>
-            </thead>
-            <tbody>
-              {submissions.map((submission, index) => (
-                <tr key={submission.id}>
-                  <td className="p-2 border">{index + 1}</td>
-                  <td className="p-2 border">{submission.district}</td>
-                  <td className="p-2 border">{submission.centre_name}</td>
-                  <td className="p-2 border">{submission.centre_code}</td>
-                  <td className="p-2 border">
-                    {/* Assuming entries are stored as JSON string - parse for display */}
-                    {Array.isArray(submission.entries)
-                      ? submission.entries.map((entry, i) => (
-                          <div key={i}>
-                            {entry.name} / {entry.confirmationNumber} / {entry.telephone} / {entry.date}
-                          </div>
-                        ))
-                      : JSON.stringify(submission.entries)}
-                  </td>
-                  <td className="p-2 border">
-                    {new Date(submission.submitted_at).toLocaleString()}
-                  </td>
+          <>
+            <table className="w-full text-left border">
+              <thead className="bg-gray-100">
+                <tr>
+                  <th className="p-2 border">#</th>
+                  <th className="p-2 border">District</th>
+                  <th className="p-2 border">Centre Name</th>
+                  <th className="p-2 border">Centre Code</th>
+                  <th className="p-2 border">Entries</th>
+                  <th className="p-2 border">Submitted At</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {submissions.map((submission, index) => (
+                  <tr key={submission.id}>
+                    <td className="p-2 border">{index + 1}</td>
+                    <td className="p-2 border">{submission.district}</td>
+                    <td className="p-2 border">{submission.centre_name}</td>
+                    <td className="p-2 border">{submission.centre_code}</td>
+                    <td className="p-2 border">
+                      {Array.isArray(submission.entries)
+                        ? submission.entries.map((entry, i) => (
+                            <div key={i}>
+                              {entry.name} / {entry.confirmationNumber} / {entry.telephone} / {entry.date}
+                            </div>
+                          ))
+                        : JSON.stringify(submission.entries)}
+                    </td>
+                    <td className="p-2 border">
+                      {new Date(submission.submitted_at).toLocaleString()}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+            {/* Export Excel Button */}
+            <div className="mt-4">
+              <button
+                onClick={exportToExcel}
+                className="px-4 py-2 bg-purple-600 text-white rounded shadow"
+              >
+                Export Excel
+              </button>
+            </div>
+          </>
         )}
       </div>
     </div>
