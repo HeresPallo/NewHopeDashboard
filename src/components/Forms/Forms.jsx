@@ -1,5 +1,5 @@
 // src/pages/Forms.jsx
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Bar } from "react-chartjs-2";
 import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend } from "chart.js";
@@ -15,14 +15,39 @@ const Forms = () => {
   const [shareModalOpen, setShareModalOpen] = useState(false);
   const [currentFormToShare, setCurrentFormToShare] = useState("");
 
-  // Dummy submission counts for graph display.
+  // Submission counts state
+  const [confirmationCount, setConfirmationCount] = useState(0);
+  const [newApplicantCount, setNewApplicantCount] = useState(0);
+  const [rrfCount, setRrfCount] = useState(0);
+
+  // Function to fetch submission counts from the three tables
+  const fetchSubmissionCounts = async () => {
+    try {
+      const [confirmationRes, newApplicantRes, rrfRes] = await Promise.all([
+        axios.get(`${API_BASE_URL}/confirmation_journal_submissions`),
+        axios.get(`${API_BASE_URL}/new_applicant_journal_submissions`),
+        axios.get(`${API_BASE_URL}/registration_rejection_form_submissions`)
+      ]);
+      setConfirmationCount(Array.isArray(confirmationRes.data) ? confirmationRes.data.length : 0);
+      setNewApplicantCount(Array.isArray(newApplicantRes.data) ? newApplicantRes.data.length : 0);
+      setRrfCount(Array.isArray(rrfRes.data) ? rrfRes.data.length : 0);
+    } catch (error) {
+      console.error("Error fetching submission counts:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchSubmissionCounts();
+    // Optionally, you could refresh counts periodically.
+  }, []);
+
+  // Prepare data for the bar chart using real counts.
   const formSubmissions = [
-    { form: "Confirmation Journal", count: 25 },
-    { form: "New Applicant Journal", count: 15 },
-    { form: "Registration Rejection Form (RRF)", count: 10 },
+    { form: "Confirmation Journal", count: confirmationCount },
+    { form: "New Applicant Journal", count: newApplicantCount },
+    { form: "Registration Rejection Form (RRF)", count: rrfCount },
   ];
 
-  // Prepare data for the bar chart.
   const chartData = {
     labels: formSubmissions.map((item) => item.form),
     datasets: [
@@ -34,7 +59,7 @@ const Forms = () => {
     ],
   };
 
-  // Posts the share request with password and user selection.
+  // Share handler: posts share request (with share password and selected mobile users) to your backend.
   const handleShareForm = (formName, sharePassword, selectedUserIds) => {
     axios
       .post(`${API_BASE_URL}/shareForm`, { formName, sharePassword, userIds: selectedUserIds })
@@ -89,6 +114,7 @@ const Forms = () => {
           </div>
           <h2 className="text-2xl font-semibold text-gray-800 mb-4">Confirmation Journal</h2>
           <p className="text-gray-600">Click here to fill the Confirmation Journal form.</p>
+          <p className="text-sm text-gray-500 mt-2">Submissions: {confirmationCount}</p>
         </div>
         
         {/* Card 2: New Applicant Journal */}
@@ -106,6 +132,7 @@ const Forms = () => {
           </div>
           <h2 className="text-2xl font-semibold text-gray-800 mb-4">New Applicant Journal</h2>
           <p className="text-gray-600">Click here to fill the New Applicant Journal form.</p>
+          <p className="text-sm text-gray-500 mt-2">Submissions: {newApplicantCount}</p>
         </div>
         
         {/* Card 3: Registration Rejection Form (RRF) */}
@@ -123,6 +150,7 @@ const Forms = () => {
           </div>
           <h2 className="text-2xl font-semibold text-gray-800 mb-4">Registration Rejection Form (RRF)</h2>
           <p className="text-gray-600">Click here to fill the RRF form.</p>
+          <p className="text-sm text-gray-500 mt-2">Submissions: {rrfCount}</p>
         </div>
       </div>
       
