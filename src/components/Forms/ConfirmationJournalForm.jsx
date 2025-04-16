@@ -1,15 +1,14 @@
-// src/pages/ConfirmationJournalForm.jsx
 import React, { useState } from "react";
-import * as XLSX from "xlsx";
+import axios from "axios";
+
+const API_BASE_URL = "https://new-hope-e46616a5d911.herokuapp.com";
 
 const ConfirmationJournalForm = () => {
   const [formData, setFormData] = useState({
     district: "",
     centreName: "",
     centreCode: "",
-    entries: [
-      { name: "", confirmationNumber: "", telephone: "", date: "" },
-    ],
+    entries: [{ name: "", confirmationNumber: "", telephone: "", date: "" }],
   });
 
   const handleInputChange = (index, e) => {
@@ -29,33 +28,33 @@ const ConfirmationJournalForm = () => {
     });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Send formData to backend
-    console.log("Confirmation Journal Data:", formData);
-  };
-
-  // Export the form data as Excel (combining header info with each entry)
-  const exportToExcel = () => {
-    const exportData = formData.entries.map(entry => ({
-      district: formData.district,
-      centreName: formData.centreName,
-      centreCode: formData.centreCode,
-      name: entry.name,
-      confirmationNumber: entry.confirmationNumber,
-      telephone: entry.telephone,
-      confirmation_date: entry.date,
-    }));
-    const ws = XLSX.utils.json_to_sheet(exportData);
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "Confirmation Journal");
-    XLSX.writeFile(wb, "ConfirmationJournal.xlsx");
+    try {
+      // Send the form data to the backend endpoint.
+      const response = await axios.post(
+        `${API_BASE_URL}/confirmation_journal_submissions`,
+        formData,
+        {
+          headers: { "Content-Type": "application/json" },
+        }
+      );
+      console.log("Confirmation Journal submitted successfully:", response.data);
+      alert("Form submitted successfully.");
+      // Optionally clear your form here
+    } catch (error) {
+      console.error("Error submitting confirmation journal:", error);
+      alert("Error submitting form.");
+    }
   };
 
   return (
     <div className="min-h-screen bg-white flex flex-col items-center p-6">
       <h1 className="text-3xl font-bold mb-4">Confirmation Journal</h1>
-      <form onSubmit={handleSubmit} className="w-full max-w-3xl bg-gray-50 p-6 rounded-xl shadow-md">
+      <form
+        onSubmit={handleSubmit}
+        className="w-full max-w-3xl bg-gray-50 p-6 rounded-xl shadow-md"
+      >
         <div className="flex gap-4 mb-4">
           <div className="w-1/3">
             <label className="block mb-1 font-semibold">District</label>
@@ -64,7 +63,9 @@ const ConfirmationJournalForm = () => {
               name="district"
               className="w-full p-2 border rounded"
               value={formData.district}
-              onChange={(e) => setFormData({ ...formData, district: e.target.value })}
+              onChange={(e) =>
+                setFormData({ ...formData, district: e.target.value })
+              }
             />
           </div>
           <div className="w-1/3">
@@ -74,7 +75,9 @@ const ConfirmationJournalForm = () => {
               name="centreName"
               className="w-full p-2 border rounded"
               value={formData.centreName}
-              onChange={(e) => setFormData({ ...formData, centreName: e.target.value })}
+              onChange={(e) =>
+                setFormData({ ...formData, centreName: e.target.value })
+              }
             />
           </div>
           <div className="w-1/3">
@@ -84,7 +87,9 @@ const ConfirmationJournalForm = () => {
               name="centreCode"
               className="w-full p-2 border rounded"
               value={formData.centreCode}
-              onChange={(e) => setFormData({ ...formData, centreCode: e.target.value })}
+              onChange={(e) =>
+                setFormData({ ...formData, centreCode: e.target.value })
+              }
             />
           </div>
         </div>
@@ -160,7 +165,11 @@ const ConfirmationJournalForm = () => {
           </button>
           <button
             type="button"
-            onClick={exportToExcel}
+            onClick={() => {
+              // Optionally, add export functionality (if needed)
+              // exportToExcel();
+              alert("Export functionality not implemented in mobile view.");
+            }}
             className="px-4 py-2 bg-purple-600 text-white rounded shadow"
           >
             Export Excel
