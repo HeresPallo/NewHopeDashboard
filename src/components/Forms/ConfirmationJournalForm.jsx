@@ -79,7 +79,7 @@ const ConfirmationJournalForm = () => {
     // Prepare data for export. For example, you can directly pass the submissions array.
     const ws = XLSX.utils.json_to_sheet(submissions);
     const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "Confirmation Journal Submissions");
+    XLSX.utils.book_append_sheet(wb, ws, "CJ Submissions");
     XLSX.writeFile(wb, "ConfirmationJournal_Submissions.xlsx");
   };
 
