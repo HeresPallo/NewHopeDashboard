@@ -52,7 +52,7 @@ const Forms = () => {
     labels: formSubmissions.map((item) => item.form),
     datasets: [
       {
-        label: "Submissions",
+        label: "",
         data: formSubmissions.map((item) => item.count),
         backgroundColor: ["#FF6384", "#36A2EB", "#FFCE56"],
       },
