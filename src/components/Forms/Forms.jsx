@@ -34,7 +34,7 @@ const Forms = () => {
     ],
   };
 
-  // Share handler: posts the share request (with password and mobile user selection) to your backend.
+  // Posts the share request with password and user selection.
   const handleShareForm = (formName, sharePassword, selectedUserIds) => {
     axios
       .post(`${API_BASE_URL}/shareForm`, { formName, sharePassword, userIds: selectedUserIds })
@@ -47,7 +47,6 @@ const Forms = () => {
       });
   };
 
-  // Opens the share modal for the specified form.
   const openShareModal = (formName, e) => {
     e.stopPropagation(); // Prevent card navigation.
     setCurrentFormToShare(formName);
@@ -88,12 +87,8 @@ const Forms = () => {
               Share
             </button>
           </div>
-          <h2 className="text-2xl font-semibold text-gray-800 mb-4">
-            Confirmation Journal
-          </h2>
-          <p className="text-gray-600">
-            Click here to fill the Confirmation Journal form.
-          </p>
+          <h2 className="text-2xl font-semibold text-gray-800 mb-4">Confirmation Journal</h2>
+          <p className="text-gray-600">Click here to fill the Confirmation Journal form.</p>
         </div>
         
         {/* Card 2: New Applicant Journal */}
@@ -109,12 +104,8 @@ const Forms = () => {
               Share
             </button>
           </div>
-          <h2 className="text-2xl font-semibold text-gray-800 mb-4">
-            New Applicant Journal
-          </h2>
-          <p className="text-gray-600">
-            Click here to fill the New Applicant Journal form.
-          </p>
+          <h2 className="text-2xl font-semibold text-gray-800 mb-4">New Applicant Journal</h2>
+          <p className="text-gray-600">Click here to fill the New Applicant Journal form.</p>
         </div>
         
         {/* Card 3: Registration Rejection Form (RRF) */}
@@ -130,16 +121,11 @@ const Forms = () => {
               Share
             </button>
           </div>
-          <h2 className="text-2xl font-semibold text-gray-800 mb-4">
-            Registration Rejection Form (RRF)
-          </h2>
-          <p className="text-gray-600">
-            Click here to fill the RRF form.
-          </p>
+          <h2 className="text-2xl font-semibold text-gray-800 mb-4">Registration Rejection Form (RRF)</h2>
+          <p className="text-gray-600">Click here to fill the RRF form.</p>
         </div>
       </div>
       
-      {/* Share Modal: Combines Mobile User Selection and Password Input */}
       {shareModalOpen && (
         <ShareFormModal
           formName={currentFormToShare}
