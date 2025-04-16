@@ -1,8 +1,12 @@
 // src/pages/NewApplicantJournalForm.jsx
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import axios from "axios";
 import * as XLSX from "xlsx";
 
+const API_BASE_URL = "https://new-hope-e46616a5d911.herokuapp.com";
+
 const NewApplicantJournalForm = () => {
+  // Form state for new applicant journal
   const [formData, setFormData] = useState({
     district: "",
     centreName: "",
@@ -12,6 +16,28 @@ const NewApplicantJournalForm = () => {
     ],
   });
 
+  // State for submission entries
+  const [submissions, setSubmissions] = useState([]);
+  const [loadingSubmissions, setLoadingSubmissions] = useState(true);
+
+  // Fetch submissions from the backend GET endpoint
+  const fetchSubmissions = async () => {
+    try {
+      const response = await axios.get(`${API_BASE_URL}/new_applicant_journal_submissions`);
+      setSubmissions(response.data);
+    } catch (error) {
+      console.error("Error fetching new applicant journal submissions:", error);
+    } finally {
+      setLoadingSubmissions(false);
+    }
+  };
+
+  // Fetch submissions on component mount
+  useEffect(() => {
+    fetchSubmissions();
+  }, []);
+
+  // Handle input changes for dynamic entries
   const handleInputChange = (index, e) => {
     const { name, value } = e.target;
     const updatedEntries = [...formData.entries];
@@ -19,6 +45,7 @@ const NewApplicantJournalForm = () => {
     setFormData({ ...formData, entries: updatedEntries });
   };
 
+  // Add a new row entry
   const addRow = () => {
     setFormData({
       ...formData,
@@ -29,28 +56,49 @@ const NewApplicantJournalForm = () => {
     });
   };
 
-  const handleSubmit = (e) => {
+  // Submit form data to backend
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Send formData to backend
-    console.log("New Applicant Journal Data:", formData);
+    try {
+      const response = await axios.post(
+        `${API_BASE_URL}/new_applicant_journal_submissions`,
+        formData,
+        { headers: { "Content-Type": "application/json" } }
+      );
+      console.log("New Applicant Journal submitted successfully:", response.data);
+      alert("Form submitted successfully.");
+      // Refresh the list of submissions after successful submission
+      fetchSubmissions();
+    } catch (error) {
+      console.error("Error submitting new applicant journal:", error);
+      alert("Error submitting form.");
+    }
   };
 
-  // Export the form data as Excel (merging header details with each entry)
+  // Export submissions to Excel
   const exportToExcel = () => {
-    const exportData = formData.entries.map(entry => ({
-      district: formData.district,
-      centreName: formData.centreName,
-      centreCode: formData.centreCode,
-      name: entry.name,
-      confirmationNumber: entry.confirmationNumber,
-      viuReceiptNumber: entry.viuReceiptNumber,
-      telephone: entry.telephone,
-      confirmation_date: entry.date,
+    if (!submissions || submissions.length === 0) {
+      alert("No submissions available to export.");
+      return;
+    }
+    // Prepare data for export; each submission becomes one row
+    // The entries field is expected to be stored as JSON; we can stringify it for export display.
+    const exportData = submissions.map(submission => ({
+      district: submission.district,
+      centreName: submission.centre_name,
+      centreCode: submission.centre_code,
+      entries: Array.isArray(submission.entries)
+        ? submission.entries.map((entry, i) =>
+            `Entry ${i + 1}: ${entry.name} / ${entry.confirmationNumber} / ${entry.viuReceiptNumber} / ${entry.telephone} / ${entry.date}`
+          ).join(" | ")
+        : JSON.stringify(submission.entries),
+      submittedAt: new Date(submission.submitted_at).toLocaleString(),
     }));
     const ws = XLSX.utils.json_to_sheet(exportData);
     const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "New Applicant Journal");
-    XLSX.writeFile(wb, "NewApplicantJournal.xlsx");
+    // Use a short sheet name (31 chars max)
+    XLSX.utils.book_append_sheet(wb, ws, "NAJ Submissions");
+    XLSX.writeFile(wb, "NewApplicantJournal_Submissions.xlsx");
   };
 
   return (
@@ -175,6 +223,61 @@ const NewApplicantJournalForm = () => {
           </button>
         </div>
       </form>
+
+      {/* Submissions Table */}
+      <div className="w-full max-w-3xl mt-10">
+        <h2 className="text-2xl font-semibold mb-4">Submitted Entries</h2>
+        {loadingSubmissions ? (
+          <p>Loading submissions...</p>
+        ) : submissions.length === 0 ? (
+          <p>No submissions yet.</p>
+        ) : (
+          <>
+            <table className="w-full text-left border">
+              <thead className="bg-gray-100">
+                <tr>
+                  <th className="p-2 border">#</th>
+                  <th className="p-2 border">District</th>
+                  <th className="p-2 border">Centre Name</th>
+                  <th className="p-2 border">Centre Code</th>
+                  <th className="p-2 border">Entries</th>
+                  <th className="p-2 border">Submitted At</th>
+                </tr>
+              </thead>
+              <tbody>
+                {submissions.map((submission, index) => (
+                  <tr key={submission.id}>
+                    <td className="p-2 border">{index + 1}</td>
+                    <td className="p-2 border">{submission.district}</td>
+                    <td className="p-2 border">{submission.centre_name}</td>
+                    <td className="p-2 border">{submission.centre_code}</td>
+                    <td className="p-2 border">
+                      {Array.isArray(submission.entries)
+                        ? submission.entries.map((entry, i) => (
+                            <div key={i}>
+                              {entry.name} / {entry.confirmationNumber} / {entry.viuReceiptNumber} / {entry.telephone} / {entry.date}
+                            </div>
+                          ))
+                        : JSON.stringify(submission.entries)}
+                    </td>
+                    <td className="p-2 border">
+                      {new Date(submission.submitted_at).toLocaleString()}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+            <div className="mt-4">
+              <button
+                onClick={exportToExcel}
+                className="px-4 py-2 bg-purple-600 text-white rounded shadow"
+              >
+                Export Excel
+              </button>
+            </div>
+          </>
+        )}
+      </div>
     </div>
   );
 };
