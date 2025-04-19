@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from 'react';
+import {  useNavigate } from "react-router-dom";
 import axios from 'axios';
 import { FiUser, FiPhone, FiMessageCircle, FiSend, FiCheckCircle, FiTrash2 } from 'react-icons/fi';
 
 const API_URL = "https://new-hope-e46616a5d911.herokuapp.com";
 
 const MessagesPage = () => {
+const navigate = useNavigate();
   const [messages, setMessages] = useState([]);
   const [responses, setResponses] = useState({});
   const [sending, setSending] = useState({});
