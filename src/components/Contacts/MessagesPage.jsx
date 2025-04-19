@@ -24,22 +24,22 @@ const MessagesPage = () => {
   const [newMsg, setNewMsg] = useState("");
   const [targetUser, setTargetUser] = useState("");
 
-  // fetch existing messages
+  // load messages + mobile users
   useEffect(() => {
     axios.get(`${API_URL}/messages`)
       .then(res => setMessages(res.data))
       .catch(err => console.error("❌ Error fetching messages:", err));
 
-    // fetch mobile users for the "create" dropdown
     axios.get(`${API_URL}/mobileusers`)
       .then(res => setMobileUsers(res.data))
       .catch(err => console.error("❌ Error fetching mobile users:", err));
   }, []);
 
+  // typing a response
   const handleResponseChange = (id, text) => {
     setResponses(prev => ({ ...prev, [id]: text }));
   };
-
+  // send admin response
   const handleSendResponse = async id => {
     const responseText = (responses[id] || "").trim();
     if (!responseText) return alert("Please enter a response.");
@@ -58,6 +58,7 @@ const MessagesPage = () => {
     }
   };
 
+  // delete message
   const handleDelete = async id => {
     if (!window.confirm("Delete this message?")) return;
     try {
@@ -69,18 +70,25 @@ const MessagesPage = () => {
     }
   };
 
-  // —————— New: create message modal ——————
+  // ───── Create‐message modal ─────
   const sendNewMessage = async () => {
     if (!targetUser || !newMsg.trim()) {
       return alert("Select a user and type a message.");
     }
     try {
-      const res = await axios.post(`${API_URL}/messages/admin`, {
-        userId: targetUser,
+      // POST to your existing /messages route—just include a userId
+      const res = await axios.post(`${API_URL}/messages`, {
+        name: "Admin",
+        phone: "",            // you can customize these fields however you like
+        userId: targetUser,   // mobile user ID
         message: newMsg
+      }, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`
+        }
       });
-      // just append it into your list so you can see it immediately:
-      setMessages(ms => [...ms, res.data.data]);
+      // append to list (adjust to whatever your backend returns)
+      setMessages(ms => [...ms, res.data.data || res.data]);
       setShowCreate(false);
       setNewMsg("");
       setTargetUser("");
@@ -93,7 +101,6 @@ const MessagesPage = () => {
 
   return (
     <div className="min-h-screen bg-gray-100 p-6">
-
       <button
         onClick={() => navigate("/contactsdashboard")}
         className="text-blue-500 hover:underline mb-4"
@@ -111,7 +118,7 @@ const MessagesPage = () => {
         </button>
       </div>
 
-      {/* create‐message modal */}
+      {/* Create Message Modal */}
       {showCreate && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-md">
@@ -163,6 +170,7 @@ const MessagesPage = () => {
         </div>
       )}
 
+      {/* Messages List */}
       <div className="space-y-4">
         {messages.length === 0
           ? <p className="text-center text-gray-500">No messages yet.</p>
@@ -201,7 +209,7 @@ const MessagesPage = () => {
                     <input
                       type="text"
                       placeholder="Type your response…"
-                      className="flex-1 border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-red-400"
+                      className="flex-1 border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-red-400"
                       value={responses[msg.id] || ''}
                       onChange={e => handleResponseChange(msg.id, e.target.value)}
                     />
