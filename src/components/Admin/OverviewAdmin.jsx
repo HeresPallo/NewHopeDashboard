@@ -33,7 +33,25 @@ export default function OverviewAdmin() {
           axios.get(`${API}/campaigns`),
           axios.get(`${API}/news`)
         ]);
-        setStats(statsRes.data);
+
+        // Sort by month (YYYY-MM) and turn into "Month YYYY"
+        const formatted = statsRes.data
+          .sort((a, b) => a.month.localeCompare(b.month))
+          .map(s => {
+            const [year, mon] = s.month.split('-');
+            const label = new Date(year, mon - 1).toLocaleString('default', {
+              month: 'long',
+              year: 'numeric'
+            });
+            return {
+              month: s.month,
+              label,
+              total_count: s.total_count,
+              engaged_count: s.engaged_count
+            };
+          });
+
+        setStats(formatted);
         setTotalDelegates(countRes.data.total);
         setCampaigns(campRes.data);
         setNews(newsRes.data);
@@ -49,15 +67,15 @@ export default function OverviewAdmin() {
 
   // Prepare Bar chart data
   const chartData = {
-    labels: stats.map(s => s.month),
+    labels: stats.map(s => s.label),
     datasets: [
       {
-        label: 'Total Created',
+        label: 'Delegates Added',
         data: stats.map(s => s.total_count),
         backgroundColor: '#36A2EB'
       },
       {
-        label: 'Engaged',
+        label: 'Delegates Engaged',
         data: stats.map(s => s.engaged_count),
         backgroundColor: '#FF6384'
       }
@@ -87,30 +105,48 @@ export default function OverviewAdmin() {
       {/* Engagement Bar Chart */}
       <div className="bg-white p-6 rounded shadow mt-8">
         <h3 className="text-xl font-semibold mb-4">Monthly Engagement</h3>
-        <Bar data={chartData} options={{ responsive: true, plugins: { legend: { position: 'top' } } }} />
+        <Bar
+          data={chartData}
+          options={{
+            responsive: true,
+            plugins: {
+              legend: { position: 'top' }
+            }
+          }}
+        />
       </div>
 
       {/* Campaign & News Previews */}
       <div className="grid grid-cols-2 gap-6 mt-8">
         <div className="bg-white p-6 rounded shadow">
           <h3 className="text-xl font-semibold mb-4">Campaigns</h3>
-          {campaigns.slice(0,3).map(c => (
+          {campaigns.slice(0, 3).map(c => (
             <div key={c.id} className="mb-4">
               <h4 className="font-bold">{c.name}</h4>
               <p>Target: ${c.target_amount.toLocaleString()}</p>
             </div>
           ))}
-          <button onClick={() => navigate('/fundraiser/viewcampaigns')} className="text-blue-500">View All</button>
+          <button
+            onClick={() => navigate('/fundraiser/viewcampaigns')}
+            className="text-blue-500"
+          >
+            View All
+          </button>
         </div>
         <div className="bg-white p-6 rounded shadow">
           <h3 className="text-xl font-semibold mb-4">Latest News</h3>
-          {news.slice(0,3).map(n => (
+          {news.slice(0, 3).map(n => (
             <div key={n.id} className="mb-4">
               <h4 className="font-bold">{n.title}</h4>
-              <p>{n.content.slice(0,80)}...</p>
+              <p>{n.content.slice(0, 80)}...</p>
             </div>
           ))}
-          <button onClick={() => navigate('/newsdashboard')} className="text-blue-500">View All</button>
+          <button
+            onClick={() => navigate('/newsdashboard')}
+            className="text-blue-500"
+          >
+            View All
+          </button>
         </div>
       </div>
     </div>
