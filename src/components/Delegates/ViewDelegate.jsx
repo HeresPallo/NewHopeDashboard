@@ -46,15 +46,17 @@ export default function ViewDelegate() {
 
   return (
     <div className="max-w-4xl mx-auto p-8 bg-white border border-gray-200 shadow-sm rounded-lg mt-10">
-      {/* Back */}
+
+      {/* 🔙 Back Button */}
       <button
         onClick={() => navigate(-1)}
         className="flex items-center text-gray-700 hover:text-red-500 font-medium mb-6 transition-all"
       >
-        <FiArrowLeft className="mr-2 text-lg" /> Back
+        <FiArrowLeft className="mr-2 text-lg" />
+        <span className="text-lg">Back</span>
       </button>
 
-      {/* Profile */}
+      {/* 🎭 Profile Section */}
       <div className="flex flex-col items-center mb-6">
         {delegate.profilepic ? (
           <img
@@ -71,13 +73,12 @@ export default function ViewDelegate() {
         <p className="text-gray-600">{delegate.role}</p>
       </div>
 
-      {/* Details Grid */}
+      {/* 📜 Delegate Details */}
       <div className="grid grid-cols-2 gap-6 text-gray-700">
-        {/* Phone, Email, Address, Constituency, Organ, Support, Engaged, Last Engaged */}
-        {/* … all your existing detail blocks … */}
+        {/* … all your existing detail blocks exactly as they were … */}
       </div>
 
-      {/* Actions */}
+      {/* 🔘 Actions */}
       <div className="mt-6 flex justify-end space-x-4">
         <button
           onClick={() => navigate(`/editdelegate/${id}`)}

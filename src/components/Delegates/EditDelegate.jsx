@@ -30,14 +30,21 @@ export default function EditDelegate() {
   const [preview, setPreview] = useState(null);
   const [picture, setPicture] = useState(null);
 
-  const { register, handleSubmit, setValue, reset, formState: { errors } } = useForm({
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    reset,
+    formState: { errors },
+  } = useForm({
     resolver: zodResolver(schema),
     mode: "onSubmit",
   });
 
   // Fetch delegate data
   useEffect(() => {
-    axios.get(`${API_BASE_URL}/delegates/${id}`)
+    axios
+      .get(`${API_BASE_URL}/delegates/${id}`)
       .then(({ data }) => {
         reset({
           name: data.name,
@@ -49,18 +56,21 @@ export default function EditDelegate() {
           supportstatus: data.supportstatus,
           organname: data.organname,
           engaged: data.engaged,
-          last_engaged: data.last_engaged ? data.last_engaged.split('T')[0] : undefined,
+          last_engaged: data.last_engaged
+            ? data.last_engaged.split("T")[0]
+            : undefined,
         });
         if (data.profilepic) setPreview(data.profilepic);
       })
-      .catch(err => console.error("Error fetching delegate:", err));
+      .catch((err) => console.error("Error fetching delegate:", err));
   }, [id, reset]);
 
   // Fetch available organs
   useEffect(() => {
-    axios.get(`${API_BASE_URL}/delegateorgans`)
-      .then(res => setOrgans(res.data))
-      .catch(err => console.error("Error fetching organs:", err));
+    axios
+      .get(`${API_BASE_URL}/delegateorgans`)
+      .then((res) => setOrgans(res.data))
+      .catch((err) => console.error("Error fetching organs:", err));
   }, []);
 
   // Handle profile pic selection
@@ -83,10 +93,12 @@ export default function EditDelegate() {
   const onSubmit = async (formData) => {
     const data = new FormData();
     Object.entries(formData).forEach(([key, val]) => {
-      if (key !== "organ_id") data.append(key, val);
+      if (key !== "organ_id") {
+        data.append(key, val);
+      }
     });
     // find organ_id
-    const organ = organs.find(o => o.organname === formData.organname);
+    const organ = organs.find((o) => o.organname === formData.organname);
     data.append("organ_id", organ ? organ.id : "");
     if (picture) data.append("profilepic", picture);
 
@@ -104,7 +116,7 @@ export default function EditDelegate() {
     }
   };
 
-  // Delete handler
+  // **Delete handler**
   const handleDeleteDelegate = async () => {
     if (!window.confirm("Are you sure you want to delete this delegate?")) return;
     try {
@@ -123,48 +135,193 @@ export default function EditDelegate() {
 
   return (
     <div className="max-w-4xl mx-auto p-6 bg-gray-100 rounded mt-6">
-      <button onClick={() => navigate(-1)} className="flex items-center text-gray-700 hover:text-red-500 mb-6">
+      <button
+        onClick={() => navigate(-1)}
+        className="flex items-center text-gray-700 hover:text-red-500 mb-6"
+      >
         <FiArrowLeft className="mr-2" /> Back
       </button>
 
       <h2 className="text-3xl font-semibold mb-6">Edit Delegate</h2>
 
       <form onSubmit={handleSubmit(onSubmit)} className="grid grid-cols-2 gap-6">
-        {/* ... all your existing inputs ... */}
+        {/* Name */}
+        <div>
+          <label className="block text-gray-700">Name</label>
+          <input
+            type="text"
+            {...register("name")}
+            className="w-full p-3 border rounded-lg mt-1"
+          />
+          {errors.name && (
+            <p className="text-red-500 text-sm">{errors.name.message}</p>
+          )}
+        </div>
+
+        {/* Role */}
+        <div>
+          <label className="block text-gray-700">Role</label>
+          <input
+            type="text"
+            {...register("role")}
+            className="w-full p-3 border rounded-lg mt-1"
+          />
+          {errors.role && (
+            <p className="text-red-500 text-sm">{errors.role.message}</p>
+          )}
+        </div>
+
+        {/* Phone */}
+        <div>
+          <label className="block text-gray-700">Phone Number</label>
+          <input
+            type="text"
+            {...register("phonenumber")}
+            className="w-full p-3 border rounded-lg mt-1"
+          />
+          {errors.phonenumber && (
+            <p className="text-red-500 text-sm">
+              {errors.phonenumber.message}
+            </p>
+          )}
+        </div>
+
+        {/* Email */}
+        <div>
+          <label className="block text-gray-700">Email</label>
+          <input
+            type="email"
+            {...register("email")}
+            className="w-full p-3 border rounded-lg mt-1"
+          />
+          {errors.email && (
+            <p className="text-red-500 text-sm">{errors.email.message}</p>
+          )}
+        </div>
+
+        {/* Address */}
+        <div>
+          <label className="block text-gray-700">Address</label>
+          <input
+            type="text"
+            {...register("address")}
+            className="w-full p-3 border rounded-lg mt-1"
+          />
+          {errors.address && (
+            <p className="text-red-500 text-sm">{errors.address.message}</p>
+          )}
+        </div>
+
+        {/* Constituency */}
+        <div>
+          <label className="block text-gray-700">Constituency</label>
+          <input
+            type="text"
+            {...register("constituency")}
+            className="w-full p-3 border rounded-lg mt-1"
+          />
+          {errors.constituency && (
+            <p className="text-red-500 text-sm">
+              {errors.constituency.message}
+            </p>
+          )}
+        </div>
+
+        {/* Organ */}
+        <div>
+          <label className="block text-gray-700">Organ Name</label>
+          <select
+            {...register("organname")}
+            className="w-full p-3 border rounded-lg mt-1"
+          >
+            <option value="">Select an Organ</option>
+            {organs.map((o) => (
+              <option key={o.id} value={o.organname}>
+                {o.organname}
+              </option>
+            ))}
+          </select>
+          {errors.organname && (
+            <p className="text-red-500 text-sm">
+              {errors.organname.message}
+            </p>
+          )}
+        </div>
+
+        {/* Support Status */}
+        <div>
+          <label className="block text-gray-700">Support Status</label>
+          <select
+            {...register("supportstatus")}
+            className="w-full p-3 border rounded-lg mt-1"
+          >
+            <option value="supports">Supports</option>
+            <option value="opposes">Opposes</option>
+            <option value="neutral">Neutral</option>
+          </select>
+        </div>
 
         {/* Engaged Checkbox */}
         <div className="flex items-center mt-4">
-          <input type="checkbox" {...register("engaged")} id="engaged" className="mr-2" />
-          <label htmlFor="engaged" className="text-gray-700">Engaged</label>
+          <input
+            type="checkbox"
+            {...register("engaged")}
+            id="engaged"
+            className="mr-2"
+          />
+          <label htmlFor="engaged" className="text-gray-700">
+            Engaged
+          </label>
         </div>
 
         {/* Last Engaged Date */}
         <div>
           <label className="block text-gray-700">Last Engaged Date</label>
-          <input type="date" {...register("last_engaged")} className="w-full p-3 border rounded-lg mt-1" />
+          <input
+            type="date"
+            {...register("last_engaged")}
+            className="w-full p-3 border rounded-lg mt-1"
+          />
         </div>
 
         {/* Profile Pic Upload */}
         <div>
-          <label className="block text-gray-700">Profile Picture (Optional)</label>
-          <input type="file" accept="image/*" onChange={handleFileChange} className="w-full p-2 border rounded-md mt-1" />
-          {preview && <img src={preview} alt="preview" className="w-32 h-32 rounded-full mt-4" />}
+          <label className="block text-gray-700">
+            Profile Picture (Optional)
+          </label>
+          <input
+            type="file"
+            accept="image/*"
+            onChange={handleFileChange}
+            className="w-full p-2 border rounded-md mt-1"
+          />
+          {preview && (
+            <img
+              src={preview}
+              alt="preview"
+              className="w-32 h-32 rounded-full mt-4"
+            />
+          )}
         </div>
 
-        {/* Save & Delete Buttons */}
-        <div className="col-span-2 flex justify-between mt-6">
+        {/* Save Button */}
+        <div className="col-span-2 flex justify-end mt-6">
+          <button
+            type="submit"
+            className="bg-green-500 text-white px-6 py-3 rounded-lg hover:bg-green-600"
+          >
+            Save Changes
+          </button>
+        </div>
+
+        {/* Delete Button */}
+        <div className="col-span-2 flex justify-start mt-6">
           <button
             type="button"
             onClick={handleDeleteDelegate}
             className="bg-red-500 text-white px-6 py-3 rounded-lg hover:bg-red-600"
           >
             Delete Delegate
-          </button>
-          <button
-            type="submit"
-            className="bg-green-500 text-white px-6 py-3 rounded-lg hover:bg-green-600"
-          >
-            Save Changes
           </button>
         </div>
       </form>
