@@ -1,13 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import { FiUser, FiPhone, FiMessageCircle, FiSend, FiCheckCircle } from 'react-icons/fi';
+import { FiUser, FiPhone, FiMessageCircle, FiSend, FiCheckCircle, FiTrash2 } from 'react-icons/fi';
 
 const API_URL = "https://new-hope-e46616a5d911.herokuapp.com";
 
 const MessagesPage = () => {
   const [messages, setMessages] = useState([]);
   const [responses, setResponses] = useState({});
-  const [sending, setSending] = useState({}); // track per-message sending state
+  const [sending, setSending] = useState({});
 
   useEffect(() => {
     axios.get(`${API_URL}/messages`)
@@ -28,11 +28,10 @@ const MessagesPage = () => {
     setSending(prev => ({ ...prev, [id]: true }));
     try {
       await axios.post(`${API_URL}/messages/${id}/respond`, { response: responseText });
-      // update local list
       setMessages(msgs => msgs.map(m =>
         m.id === id ? { ...m, admin_response: responseText } : m
       ));
-      delete responses[id];
+      setResponses(prev => { const c = { ...prev }; delete c[id]; return c; });
     } catch (err) {
       console.error("❌ Error sending response:", err);
       alert("Failed to send response.");
@@ -41,17 +40,36 @@ const MessagesPage = () => {
     }
   };
 
+  const handleDelete = async (id) => {
+    if (!window.confirm("Are you sure you want to delete this message?")) return;
+    try {
+      await axios.delete(`${API_URL}/messages/${id}`);
+      setMessages(msgs => msgs.filter(m => m.id !== id));
+    } catch (err) {
+      console.error("❌ Error deleting message:", err);
+      alert("Failed to delete message.");
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-100 p-6">
+     <button onClick={() => navigate("/contactsdashboard")} className="text-blue-500 hover:underline mb-4">
+        ← Back
+      </button>
       <h2 className="text-2xl font-bold text-gray-800 mb-6">User Messages</h2>
       <div className="space-y-4">
         {messages.length === 0 ? (
           <p className="text-center text-gray-500">No messages yet.</p>
         ) : messages.map(msg => (
-          <div
-            key={msg.id}
-            className="bg-white p-6 rounded-xl shadow hover:shadow-lg transition"
-          >
+          <div key={msg.id} className="relative bg-white p-6 rounded-xl shadow hover:shadow-lg transition">
+            {/* Delete button */}
+            <button
+              onClick={() => handleDelete(msg.id)}
+              className="absolute top-4 right-4 text-gray-400 hover:text-red-600 transition"
+            >
+              <FiTrash2 size={18} />
+            </button>
+
             {/* Header: name & phone */}
             <div className="flex items-center mb-4 space-x-4">
               <div className="flex items-center text-gray-700 space-x-2">
@@ -90,7 +108,7 @@ const MessagesPage = () => {
                   disabled={sending[msg.id]}
                   className="mt-2 sm:mt-0 flex items-center bg-green-600 hover:bg-green-700 text-white font-semibold px-4 py-2 rounded-lg transition disabled:opacity-50"
                 >
-                  <FiSend className="mr-2" /> 
+                  <FiSend className="mr-2" />
                   {sending[msg.id] ? 'Sending…' : 'Send'}
                 </button>
               </div>
