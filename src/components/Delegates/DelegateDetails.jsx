@@ -6,6 +6,7 @@ import DelegatesTable from "./DelegatesTable";
 import EngagementCalendar from "../Calendar/EngagementCalendar";
 import SupportStatusGraph from "../Graph/SupportStatusGraph";
 import { FiArrowLeft } from "react-icons/fi";
+import EngagementStatusGraph from '../Graph/EngagementStatusGraph';
 
 const DelegateDetails = () => {
   const { organname } = useParams();
@@ -56,6 +57,13 @@ const DelegateDetails = () => {
 
       {/* Dashboard Grid Layout */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+
+
+       {/* 📈 Engagement Overview Graph */}
+       <div className="bg-white p-6 rounded-lg shadow-md">
+        <h2 className="text-xl font-semibold mb-4">Engagement Overview</h2>
+        <EngagementStatusGraph organname={organname} />
+        </div>
         
         {/* 📊 Support Status Graph */}
         <div className="col-span-1 md:col-span-1 lg:col-span-1 bg-white p-6 rounded-lg shadow-md">
