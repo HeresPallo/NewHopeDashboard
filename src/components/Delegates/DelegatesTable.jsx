@@ -6,7 +6,6 @@ const DelegatesTable = ({ delegates, organname }) => {
     <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
       <h2 className="text-2xl font-semibold text-gray-800 mb-6">{organname} Delegates</h2>
 
-      {/* Table Layout */}
       <div className="overflow-x-auto">
         <table className="w-full border-collapse">
           <thead>
@@ -17,6 +16,8 @@ const DelegatesTable = ({ delegates, organname }) => {
               <th className="p-3">Email</th>
               <th className="p-3">Constituency</th>
               <th className="p-3">Support</th>
+              <th className="p-3">Engaged?</th>
+              <th className="p-3">Last Engaged</th>
               <th className="p-3">Picture</th>
               <th className="p-3 text-center">Actions</th>
             </tr>
@@ -24,7 +25,9 @@ const DelegatesTable = ({ delegates, organname }) => {
           <tbody>
             {delegates.length === 0 ? (
               <tr>
-                <td colSpan="8" className="text-center py-6 text-gray-500">No delegates found.</td>
+                <td colSpan="10" className="text-center py-6 text-gray-500">
+                  No delegates found.
+                </td>
               </tr>
             ) : (
               delegates.map((delegate) => (
@@ -46,6 +49,22 @@ const DelegatesTable = ({ delegates, organname }) => {
                     >
                       {delegate.supportstatus}
                     </span>
+                  </td>
+                  <td className="p-3">
+                    <span
+                      className={`px-3 py-1 rounded-full text-xs font-medium ${
+                        delegate.engaged
+                          ? "bg-green-100 text-green-600"
+                          : "bg-red-100 text-red-600"
+                      }`}
+                    >
+                      {delegate.engaged ? "Yes" : "No"}
+                    </span>
+                  </td>
+                  <td className="p-3">
+                    {delegate.last_engaged
+                      ? new Date(delegate.last_engaged).toLocaleDateString()
+                      : "—"}
                   </td>
                   <td className="p-3">
                     {delegate.profilepic ? (
