@@ -10,6 +10,7 @@ const DelegatesTable = ({ delegates, organname }) => {
         <table className="w-full border-collapse">
           <thead>
             <tr className="bg-gray-50 text-gray-600 text-sm uppercase text-left">
+              <th className="p-3">#</th>
               <th className="p-3">Name</th>
               <th className="p-3">Role</th>
               <th className="p-3">Phone</th>
@@ -25,13 +26,14 @@ const DelegatesTable = ({ delegates, organname }) => {
           <tbody>
             {delegates.length === 0 ? (
               <tr>
-                <td colSpan="10" className="text-center py-6 text-gray-500">
+                <td colSpan="11" className="text-center py-6 text-gray-500">
                   No delegates found.
                 </td>
               </tr>
             ) : (
-              delegates.map((delegate) => (
+              delegates.map((delegate, index) => (
                 <tr key={delegate.id} className="border-b hover:bg-gray-50 text-gray-700">
+                  <td className="p-3">{index + 1}</td>
                   <td className="p-3">{delegate.name}</td>
                   <td className="p-3">{delegate.role}</td>
                   <td className="p-3">{delegate.phonenumber}</td>
