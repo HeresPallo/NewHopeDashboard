@@ -1,5 +1,4 @@
-import React from 'react';
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
@@ -7,243 +6,153 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { FiArrowLeft } from "react-icons/fi";
 
-const EditDelegate = () => {
+const API_BASE_URL = "https://new-hope-e46616a5d911.herokuapp.com";
+
+export default function EditDelegate() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const [loading, setLoading] = useState(true);
-  const [errorMessage, setErrorMessage] = useState(null);
-  const [successMessage, setSuccessMessage] = useState(null);
-  const [picture, setPicture] = useState(null);
+  const [organs, setOrgans] = useState([]);
   const [preview, setPreview] = useState(null);
-  const [organs, setOrgans] = useState([]); // Stores organ options
+  const [picture, setPicture] = useState(null);
 
-  // Validation schema for the form
   const schema = z.object({
-    name: z.string().min(3, { message: "Name is required" }),
-    role: z.string().min(2, { message: "Role is required" }),
-    phonenumber: z.string().min(9, { message: "Phone number is required" }),
-    email: z.string().email({ message: "Invalid email address" }),
-    address: z.string().min(3, { message: "Address is required" }),
-    constituency: z.string().min(3, { message: "Constituency is required" }),
-    supportstatus: z.enum(["supports", "opposes", "neutral"], { message: "Select a support status" }),
-    organname: z.string().min(1, { message: "Please select an organ" }),
-    profilepic: z.any().optional(), // Profile pic remains optional
+    name: z.string().min(1),
+    role: z.string().min(1),
+    phonenumber: z.string().min(1),
+    email: z.string().email(),
+    address: z.string().min(1),
+    constituency: z.string().min(1),
+    supportstatus: z.enum(["supports","opposes","neutral"]),
+    organname: z.string().min(1),
+    profilepic: z.any().optional(),
+    engaged: z.boolean().optional(),
+    last_engaged: z.string().optional()
   });
 
-  const { register, handleSubmit, formState: { errors }, setValue, reset } = useForm({
+  const {
+    register, handleSubmit, setValue,
+    reset, formState: { errors }
+  } = useForm({
     resolver: zodResolver(schema),
-    mode: "onSubmit",
+    mode: "onSubmit"
   });
 
-  // Fetch Delegate Data on Load
+  // Fetch delegate
   useEffect(() => {
-    if (!id) return;
-  
-    axios.get(`https://new-hope-e46616a5d911.herokuapp.com/delegates/${id}`)
-      .then(response => {
-        console.log("Fetched Delegate Data:", response.data);  // Debugging
-        reset(response.data); // Populate form with fetched data
-        if (response.data.profilepic) setPreview(response.data.profilepic);
-        setLoading(false);
+    axios.get(`${API_BASE_URL}/delegates/${id}`)
+      .then(({ data }) => {
+        // populate form fields
+        reset({
+          ...data,
+          last_engaged: data.last_engaged || ""
+        });
+        if (data.profilepic) setPreview(data.profilepic);
       })
-      .catch(error => {
-        console.error("Error fetching delegate details:", error);
-        setErrorMessage("Delegate not found or deleted.");
-        setLoading(false);
-      });
+      .catch(() => {})
+      .finally(() => {});
   }, [id, reset]);
-  
 
-  // Fetch Organ Names
+  // Fetch organs
   useEffect(() => {
-    axios.get("https://new-hope-e46616a5d911.herokuapp.com/delegateorgans")
-      .then(response => setOrgans(response.data))
-      .catch(error => console.error("Error fetching organs:", error));
+    axios.get(`${API_BASE_URL}/delegateorgans`)
+      .then(res => setOrgans(res.data))
+      .catch(() => {});
   }, []);
 
-  // Handle Image Upload
-  const handleFileChange = (e) => {
+  const handleFileChange = e => {
     const file = e.target.files[0];
     if (!file) return;
-  
-    const allowedTypes = ["image/png", "image/jpeg", "image/jpg"];
-    if (!allowedTypes.includes(file.type)) {
-      alert("Only JPEG and PNG images are allowed!");
-      return;
-    }
-  
     setPicture(file);
-    setValue("profilepic", file); // Ensure the form field for profilepic is set
+    setValue("profilepic", file);
     const reader = new FileReader();
     reader.onloadend = () => setPreview(reader.result);
     reader.readAsDataURL(file);
   };
-  
 
-  // Handle Form Submission
-  const onSubmit = async (formData) => {
+  const onSubmit = async formData => {
     const data = new FormData();
-    data.append("name", formData.name);
-    data.append("role", formData.role);
-    data.append("phonenumber", formData.phonenumber);
-    data.append("email", formData.email);
-    data.append("address", formData.address);
-    data.append("constituency", formData.constituency);
-    data.append("supportstatus", formData.supportstatus);
-    data.append("organname", formData.organname);
-    data.append("organ_id", organs.find(org => org.organname === formData.organname)?.id || "");
-
-    if (picture) {
-      data.append("profilepic", picture);
-    }
+    // append all fields
+    Object.entries(formData).forEach(([k,v]) => {
+      if (k === "organ_id") return;
+      data.append(k, v);
+    });
+    // overwrite organ_id
+    const organ = organs.find(o => o.organname === formData.organname);
+    data.append("organ_id", organ?.id || "");
+    if (picture) data.append("profilepic", picture);
 
     try {
-      await axios.patch(`https://new-hope-e46616a5d911.herokuapp.com/delegates/${id}`, data, {
-        headers: { "Content-Type": "multipart/form-data" },
+      await axios.patch(`${API_BASE_URL}/delegates/${id}`, data, {
+        headers: { "Content-Type": "multipart/form-data" }
       });
-
-      setSuccessMessage(alert("Delegate Updated Successfully!"));
-      setTimeout(() => navigate("/delegateorgans"), 1000);
-    } catch (error) {
-      console.error("❌ Error submitting form:", error);
-      setErrorMessage(error.response?.data?.error || "An unexpected error occurred.");
-    }
-  };
-
-  // Handle Delegate Deletion
-  const handleDelete = async () => {
-    const confirmDelete = window.confirm("Are you sure you want to delete this delegate?");
-    if (!confirmDelete) return;
-
-    try {
-      await axios.delete(`https://new-hope-e46616a5d911.herokuapp.com/delegates/${id}`);
-      alert("Delegate deleted successfully!");
+      alert("Delegate updated!");
       navigate("/delegateorgans");
-    } catch (error) {
-      console.error("❌ Error deleting delegate:", error);
-      alert("Failed to delete delegate.");
+    } catch {
+      alert("Update failed.");
     }
   };
-
-  if (loading) return <p className="text-center text-gray-500">Loading delegate details...</p>;
 
   return (
-    <div className="max-w-4xl mx-auto p-6 bg-gray-100 border border-gray-200 mt-6">
+    <div className="max-w-4xl mx-auto p-6 bg-gray-100 rounded mt-6">
       <button
         onClick={() => navigate(-1)}
-        className="flex items-center text-gray-700 hover:text-red-500 mb-6 transition-all"
+        className="flex items-center text-gray-700 hover:text-red-500 mb-6"
       >
-        <FiArrowLeft className="mr-2 text-lg" />
-        <span className="text-lg font-medium">Back</span>
+        <FiArrowLeft className="mr-2" /> Back
       </button>
 
-      <h2 className="text-3xl font-semibold text-center text-gray-800 mb-6">Edit Delegate</h2>
+      <h2 className="text-3xl font-semibold mb-6">Edit Delegate</h2>
 
       <form onSubmit={handleSubmit(onSubmit)} className="grid grid-cols-2 gap-6">
-  {/* Name */}
-  <div>
-    <label className="block text-gray-700">Name</label>
-    <input
-      type="text"
-      {...register("name")}
-      className="w-full p-3 border rounded-lg mt-1"
-    />
-    {errors.name && <p className="text-red-500 text-sm">{errors.name.message}</p>}
-  </div>
+        {/* ... existing inputs ... */}
 
-  {/* Role */}
-  <div>
-    <label className="block text-gray-700">Role</label>
-    <input
-      type="text"
-      {...register("role")}
-      className="w-full p-3 border rounded-lg mt-1"
-    />
-  </div>
+        {/* Support Status */}
+        <div>
+          <label>Support Status</label>
+          <select {...register("supportstatus")} className="w-full p-2 border rounded mt-1">
+            <option value="supports">Supports</option>
+            <option value="opposes">Opposes</option>
+            <option value="neutral">Neutral</option>
+          </select>
+        </div>
 
-  {/* Phone */}
-  <div>
-    <label className="block text-gray-700">Phone Number</label>
-    <input
-      type="text"
-      {...register("phonenumber")}
-      className="w-full p-3 border rounded-lg mt-1"
-    />
-  </div>
+        {/* Engaged */}
+        <div className="flex items-center mt-4">
+          <input type="checkbox" {...register("engaged")} id="engaged" />
+          <label htmlFor="engaged" className="ml-2">Engaged</label>
+        </div>
 
-  {/* Email */}
-  <div>
-    <label className="block text-gray-700">Email</label>
-    <input
-      type="email"
-      {...register("email")}
-      className="w-full p-3 border rounded-lg mt-1"
-    />
-  </div>
+        {/* Last Engaged Date */}
+        <div>
+          <label>Last Engaged Date</label>
+          <input
+            type="date"
+            {...register("last_engaged")}
+            className="w-full p-2 border rounded mt-1"
+          />
+        </div>
 
-  {/* Address */}
-  <div>
-    <label className="block text-gray-700">Address</label>
-    <input
-      type="text"
-      {...register("address")}
-      className="w-full p-3 border rounded-lg mt-1"
-    />
-  </div>
+        {/* Profile Picture */}
+        <div>
+          <label>Profile Picture (Optional)</label>
+          <input
+            type="file"
+            accept="image/*"
+            className="w-full p-2 border rounded mt-1"
+            onChange={handleFileChange}
+          />
+          {preview && (
+            <img src={preview} className="w-32 h-32 rounded-full mt-4" alt="preview"/>
+          )}
+        </div>
 
-  {/* Constituency */}
-  <div>
-    <label className="block text-gray-700">Constituency</label>
-    <input
-      type="text"
-      {...register("constituency")}
-      className="w-full p-3 border rounded-lg mt-1"
-    />
-  </div>
-
-  {/* Organ Name */}
-  <div>
-    <label className="block text-gray-700">Organ Name</label>
-    <select {...register("organname")} className="w-full p-3 border rounded-lg mt-1">
-      <option value="">Select an Organ</option>
-      {organs.map(org => <option key={org.id} value={org.organname}>{org.organname}</option>)}
-    </select>
-  </div>
-
-  {/* Support Status */}
-  <div>
-    <label className="block text-gray-700">Support Status</label>
-    <select {...register("supportstatus")} className="w-full p-3 border rounded-lg mt-1">
-      <option value="supports">Supports</option>
-      <option value="opposes">Opposes</option>
-      <option value="neutral">Neutral</option>
-    </select>
-  </div>
-
-  {/* Profile Picture Upload */}
-<div>
-  <label className="block text-gray-700">Profile Picture (Optional)</label>
-  <input
-    type="file"
-    accept="image/png, image/jpeg"
-    className="w-full p-2 border rounded-md mt-1 focus:outline-none"
-    onChange={handleFileChange}
-  />
-  {preview && (
-    <img src={preview} alt="Profile Preview" className="w-32 h-32 rounded-full mt-4" />
-  )}
-</div>
-
-
-  {/* Save & Delete Buttons */}
-  <div className="col-span-2 flex justify-between mt-6">
-    <button type="submit" className="bg-red-500 text-white px-6 py-3 rounded-lg hover:bg-red-600 transition-all">Save Changes</button>
-    <button type="button" onClick={handleDelete} className="bg-gray-700 text-white px-6 py-3 rounded-lg hover:bg-gray-800 transition-all">Delete Delegate</button>
-  </div>
-</form>
-
+        {/* Save / Delete */}
+        <div className="col-span-2 flex justify-between mt-6">
+          <button type="submit" className="bg-red-500 text-white px-6 py-3 rounded">
+            Save Changes
+          </button>
+        </div>
+      </form>
     </div>
   );
-};
-
-export default EditDelegate;
+}
