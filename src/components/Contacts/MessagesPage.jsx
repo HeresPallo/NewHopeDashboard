@@ -24,7 +24,7 @@ const MessagesPage = () => {
   const [newMsg, setNewMsg] = useState("");
   const [targetUser, setTargetUser] = useState("");
 
-  // load messages + mobile users
+  // Load messages + mobile users
   useEffect(() => {
     axios.get(`${API_URL}/messages`)
       .then(res => setMessages(res.data))
@@ -35,11 +35,12 @@ const MessagesPage = () => {
       .catch(err => console.error("❌ Error fetching mobile users:", err));
   }, []);
 
-  // typing a response
+  // Typing a response
   const handleResponseChange = (id, text) => {
     setResponses(prev => ({ ...prev, [id]: text }));
   };
-  // send admin response
+
+  // Send admin response to user
   const handleSendResponse = async id => {
     const responseText = (responses[id] || "").trim();
     if (!responseText) return alert("Please enter a response.");
@@ -58,7 +59,7 @@ const MessagesPage = () => {
     }
   };
 
-  // delete message
+  // Delete a message
   const handleDelete = async id => {
     if (!window.confirm("Delete this message?")) return;
     try {
@@ -70,25 +71,23 @@ const MessagesPage = () => {
     }
   };
 
-  // ───── Create‐message modal ─────
+  // Send a brand new admin→mobile message
   const sendNewMessage = async () => {
     if (!targetUser || !newMsg.trim()) {
       return alert("Select a user and type a message.");
     }
+    const token = localStorage.getItem("token");
+    if (!token) {
+      return alert("You must be logged in as admin.");
+    }
     try {
-      // POST to your existing /messages route—just include a userId
-      const res = await axios.post(`${API_URL}/messages`, {
-        name: "Admin",
-        phone: "",            // you can customize these fields however you like
-        userId: targetUser,   // mobile user ID
-        message: newMsg
-      }, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`
-        }
-      });
-      // append to list (adjust to whatever your backend returns)
-      setMessages(ms => [...ms, res.data.data || res.data]);
+      const res = await axios.post(
+        `${API_URL}/messages/admin`,
+        { userId: targetUser, message: newMsg },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      // Append returned message to list
+      setMessages(ms => [...ms, res.data.data]);
       setShowCreate(false);
       setNewMsg("");
       setTargetUser("");
