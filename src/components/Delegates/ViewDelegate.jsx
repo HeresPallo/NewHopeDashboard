@@ -74,12 +74,54 @@ export default function ViewDelegate() {
       </div>
 
       {/* 📜 Delegate Details */}
-      <div className="grid grid-cols-2 gap-6 text-gray-700">
-        {/* … all your existing detail blocks exactly as they were … */}
+      <div className="grid grid-cols-2 gap-6 text-gray-700 mb-6">
+        <div className="flex flex-col">
+          <span className="text-gray-500 text-sm">📞 Phone</span>
+          <span className="font-medium">{delegate.phonenumber}</span>
+        </div>
+        <div className="flex flex-col">
+          <span className="text-gray-500 text-sm">✉️ Email</span>
+          <span className="font-medium">{delegate.email}</span>
+        </div>
+        <div className="flex flex-col">
+          <span className="text-gray-500 text-sm">🏡 Address</span>
+          <span className="font-medium">{delegate.address}</span>
+        </div>
+        <div className="flex flex-col">
+          <span className="text-gray-500 text-sm">📍 Constituency</span>
+          <span className="font-medium">{delegate.constituency}</span>
+        </div>
+        <div className="flex flex-col">
+          <span className="text-gray-500 text-sm">🏛️ Organ Name</span>
+          <span className="font-medium">{delegate.organname}</span>
+        </div>
+        <div className="flex flex-col">
+          <span className="text-gray-500 text-sm">📊 Support Status</span>
+          <span className={`px-3 py-1 text-sm font-medium rounded-full text-white w-fit
+              ${delegate.supportstatus === 'supports' ? 'bg-green-500' :
+                delegate.supportstatus === 'opposes' ? 'bg-red-500' : 'bg-gray-500'}`}>
+            {delegate.supportstatus}
+          </span>
+        </div>
+        <div className="flex flex-col">
+          <span className="text-gray-500 text-sm">✅ Engaged</span>
+          <span className={`px-3 py-1 text-sm font-medium rounded-full text-white w-fit
+              ${delegate.engaged ? 'bg-green-500' : 'bg-red-500'}`}>
+            {delegate.engaged ? 'Yes' : 'No'}
+          </span>
+        </div>
+        <div className="flex flex-col">
+          <span className="text-gray-500 text-sm">📅 Last Engaged</span>
+          <span className="font-medium">
+            {delegate.last_engaged
+              ? new Date(delegate.last_engaged).toLocaleDateString()
+              : 'N/A'}
+          </span>
+        </div>
       </div>
 
       {/* 🔘 Actions */}
-      <div className="mt-6 flex justify-end space-x-4">
+      <div className="flex justify-end space-x-4">
         <button
           onClick={() => navigate(`/editdelegate/${id}`)}
           className="px-5 py-2 text-sm bg-blue-600 text-white rounded hover:bg-blue-700 transition-all"
