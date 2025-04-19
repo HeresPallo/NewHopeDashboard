@@ -1,86 +1,60 @@
-// ShareFormModal.jsx
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 
 const API_BASE_URL = "https://new-hope-e46616a5d911.herokuapp.com";
 
-const ShareFormModal = ({ formName, onClose, onShare }) => {
-  const [password, setPassword] = useState("");
+export default function ShareFormModal({ formName, onClose, onShare }) {
   const [mobileUsers, setMobileUsers] = useState([]);
   const [selectedUserIds, setSelectedUserIds] = useState([]);
+  const [password, setPassword] = useState("");
 
-  // Fetch mobile users on mount
   useEffect(() => {
     axios
       .get(`${API_BASE_URL}/mobileusers`)
-      .then((response) => {
-        const data = response.data;
-        if (Array.isArray(data)) {
-          setMobileUsers(data);
-        } else if (data && Array.isArray(data.users)) {
-          setMobileUsers(data.users);
-        } else {
-          console.error("API response is not in expected format:", data);
-          setMobileUsers([]);
-        }
-      })
-      .catch((error) => {
-        console.error("Error fetching mobile users:", error);
-      });
+      .then((r) => setMobileUsers(r.data))
+      .catch(console.error);
   }, []);
 
-  const handleUserSelectionChange = (e) => {
-    const options = e.target.options;
-    const selected = [];
-    for (let i = 0; i < options.length; i++) {
-      if (options[i].selected) {
-        selected.push(options[i].value);
-      }
-    }
-    setSelectedUserIds(selected);
-  };
-
   const handleShare = () => {
-    if (!password) {
-      alert("Please enter a share password.");
-      return;
-    }
-    if (selectedUserIds.length === 0) {
-      alert("Please select at least one mobile user.");
-      return;
-    }
-    // Call parent's callback with the form name, password, and selected mobile user IDs.
+    if (!password) return alert("Please set a share password.");
+    if (!selectedUserIds.length) return alert("Please select at least one user.");
     onShare(formName, password, selectedUserIds);
     onClose();
   };
 
   return (
-    <div className="fixed top-0 left-0 w-full h-full flex items-center justify-center bg-black bg-opacity-50 z-50">
-      <div className="bg-white rounded-lg p-6 w-96">
-        <h3 className="text-xl font-bold mb-4">Share {formName}</h3>
-        <label className="block mb-2 font-semibold">Select Mobile Users</label>
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+      <div className="bg-white p-6 rounded shadow-lg w-96">
+        <h2 className="text-xl font-bold mb-4">Share {formName}</h2>
+
+        <label className="block mb-2 font-semibold">Password:</label>
+        <input
+          type="password"
+          className="w-full mb-4 p-2 border rounded"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          placeholder="Set a share password"
+        />
+
+        <label className="block mb-2 font-semibold">Select Mobile Users:</label>
         <select
           multiple
-          className="w-full h-40 border p-2 mb-4"
+          className="w-full h-32 mb-4 border p-2"
           value={selectedUserIds}
-          onChange={handleUserSelectionChange}
+          onChange={(e) => {
+            const opts = Array.from(e.target.selectedOptions).map((o) => o.value);
+            setSelectedUserIds(opts);
+          }}
         >
-          {mobileUsers.map((user) => (
-            <option key={user.id} value={user.id}>
-              {user.name} (ID: {user.id})
+          {mobileUsers.map((u) => (
+            <option key={u.id} value={u.id}>
+              {u.name} (ID: {u.id})
             </option>
           ))}
         </select>
-        <label className="block mb-2 font-semibold">Share Password</label>
-        <input
-          type="password"
-          className="w-full p-2 border rounded mb-4"
-          placeholder="Enter share password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-        />
+
         <div className="flex justify-end">
-          <button className="px-4 py-2 bg-gray-300 rounded mr-2" onClick={onClose}>
+          <button className="mr-2 px-4 py-2 bg-gray-200 rounded" onClick={onClose}>
             Cancel
           </button>
           <button className="px-4 py-2 bg-blue-600 text-white rounded" onClick={handleShare}>
@@ -90,6 +64,4 @@ const ShareFormModal = ({ formName, onClose, onShare }) => {
       </div>
     </div>
   );
-};
-
-export default ShareFormModal;
+}
