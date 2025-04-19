@@ -24,7 +24,6 @@ const MessagesPage = () => {
   const [newMsg, setNewMsg] = useState("");
   const [targetUser, setTargetUser] = useState("");
 
-  // Load messages + mobile users
   useEffect(() => {
     axios.get(`${API_URL}/messages`)
       .then(res => setMessages(res.data))
@@ -35,12 +34,10 @@ const MessagesPage = () => {
       .catch(err => console.error("❌ Error fetching mobile users:", err));
   }, []);
 
-  // Typing a response
   const handleResponseChange = (id, text) => {
     setResponses(prev => ({ ...prev, [id]: text }));
   };
 
-  // Send admin response to user
   const handleSendResponse = async id => {
     const responseText = (responses[id] || "").trim();
     if (!responseText) return alert("Please enter a response.");
@@ -59,7 +56,6 @@ const MessagesPage = () => {
     }
   };
 
-  // Delete a message
   const handleDelete = async id => {
     if (!window.confirm("Delete this message?")) return;
     try {
@@ -71,7 +67,7 @@ const MessagesPage = () => {
     }
   };
 
-  // Send a brand new admin→mobile message
+  // —————— New: create admin→mobile message ——————
   const sendNewMessage = async () => {
     if (!targetUser || !newMsg.trim()) {
       return alert("Select a user and type a message.");
@@ -80,13 +76,21 @@ const MessagesPage = () => {
     if (!token) {
       return alert("You must be logged in as admin.");
     }
+
     try {
       const res = await axios.post(
         `${API_URL}/messages/admin`,
         { userId: targetUser, message: newMsg },
-        { headers: { Authorization: `Bearer ${token}` } }
+        {
+          headers: {
+            // ← send the JWT here so Passport can verify it
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json"
+          }
+        }
       );
-      // Append returned message to list
+
+      // append it so you see it immediately
       setMessages(ms => [...ms, res.data.data]);
       setShowCreate(false);
       setNewMsg("");
