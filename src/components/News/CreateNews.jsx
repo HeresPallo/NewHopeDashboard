@@ -6,48 +6,78 @@ const CreateNews = () => {
   const navigate = useNavigate();
   const token = localStorage.getItem("token");
   let defaultStatus = "user";
+
   if (token) {
     const decoded = decodeJwt(token);
     defaultStatus = decoded?.role === "admin" ? "admin" : "user";
   }
 
   const [formData, setFormData] = useState({
-    title: "", content: "", category: "", status: defaultStatus,
-    thumbnail: null, showSkillsLink: false,
+    title: "",
+    content: "",
+    category: "",
+    status: defaultStatus,
+    thumbnail: null,
+    showSkillsLink: false,
   });
-  const [mobileButtons, setMobileButtons] = useState([]); // <-- new
-  const [btnLabel, setBtnLabel] = useState("");
-  const [btnRoute, setBtnRoute] = useState("");
 
-  const categories = [ /* …your categories… */ ];
-  const statuses  = ["admin","user"];
+  const [mobileButtons, setMobileButtons] = useState([]);
+  const [newButtonLabel, setNewButtonLabel] = useState("");
+  const [newButtonRoute, setNewButtonRoute] = useState("");
+
+  const categories = [
+    "Art","Business","Culture","Education","Economy","Elderly Care",
+    "Entertainment","Environment","Health","Labor","Local News",
+    "Other","Political Support","Presidential Campaign","Science",
+    "Social Issues","Sports","Technology","Transportation","Youth"
+  ];
+  const statuses = ["admin", "user"];
+
+  function decodeJwt(t) {
+    try {
+      const payload = t.split('.')[1];
+      return JSON.parse(atob(payload.replace(/-/g,'+').replace(/_/g,'/')));
+    } catch {
+      return null;
+    }
+  }
 
   const handleChange = e => {
     const { name, value, type, checked } = e.target;
-    setFormData(f => ({
-      ...f,
+    setFormData(prev => ({
+      ...prev,
       [name]: type==="checkbox" ? checked : value
     }));
   };
 
   const handleFileChange = e => {
-    setFormData(f => ({ ...f, thumbnail: e.target.files[0] }));
+    setFormData(prev => ({ ...prev, thumbnail: e.target.files[0] }));
   };
 
-  // add one mobile‐button
   const addMobileButton = () => {
-    if (!btnLabel||!btnRoute) return alert("Label + Route required");
-    setMobileButtons(mb => [...mb, { label:btnLabel, route:btnRoute }]);
-    setBtnLabel(""); setBtnRoute("");
+    if (!newButtonLabel || !newButtonRoute) return alert("Both label and route required");
+    setMobileButtons(prev => [...prev, { label: newButtonLabel, route: newButtonRoute }]);
+    setNewButtonLabel("");
+    setNewButtonRoute("");
+  };
+
+  const removeMobileButton = index => {
+    setMobileButtons(prev => prev.filter((_,i)=>i!==index));
   };
 
   const handleSubmit = async e => {
     e.preventDefault();
     if (!token) {
-      alert("Login required"); return navigate("/login");
+      alert("Login required"); 
+      return navigate("/login");
     }
+    const decoded = decodeJwt(token);
+    if (!decoded || decoded.exp*1000 < Date.now()) {
+      alert("Session expired"); 
+      return navigate("/login");
+    }
+
     try {
-      const decoded = decodeJwt(token);
       const data = new FormData();
       data.append("title", formData.title);
       data.append("content", formData.content);
@@ -55,94 +85,107 @@ const CreateNews = () => {
       data.append("status", formData.status);
       data.append("user_id", decoded.id);
       data.append("showSkillsLink", formData.showSkillsLink);
-      // send your mobileButtons as JSON
       data.append("mobile_buttons", JSON.stringify(mobileButtons));
-      if (formData.thumbnail) data.append("thumbnail", formData.thumbnail);
+      if (formData.thumbnail) {
+        data.append("thumbnail", formData.thumbnail);
+      }
 
       await axios.post(
         "https://new-hope-e46616a5d911.herokuapp.com/news",
-        data, {
+        data,
+        {
           headers: {
             "Content-Type": "multipart/form-data",
-            Authorization: `Bearer ${token}`,
+            "Authorization": `Bearer ${token}`
           }
         }
       );
-      alert("News created!");
+
+      alert("News story created successfully!");
       navigate("/newsdashboard");
     } catch (err) {
-      console.error(err);
-      alert("Failed: "+(err.response?.data?.error||err.message));
+      console.error("Error:", err.response?.data || err.message);
+      alert("Failed to create news: " + (err.response?.data?.error || err.message));
     }
   };
 
-  function decodeJwt(t) {
-    try {
-      const p=JSON.parse(atob(t.split('.')[1])); return p;
-    } catch { return {}; }
-  }
-
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center p-6 bg-white">
+    <div className="min-h-screen flex flex-col items-center justify-center bg-white p-6">
       <div className="max-w-3xl w-full bg-gray-100 p-8">
-        <h2 className="text-4xl font-bold text-center mb-6">Create News</h2>
+        <h2 className="text-4xl font-bold text-gray-900 text-center mb-6">Create News Story</h2>
+
         <form onSubmit={handleSubmit} className="space-y-6">
+
           {/* Title */}
           <div>
-            <label>Post Title</label>
+            <label className="block text-gray-700 font-semibold">Post Title</label>
             <input
-              name="title" value={formData.title} onChange={handleChange}
-              required className="w-full p-3 border rounded"
+              type="text"
+              name="title"
+              onChange={handleChange}
+              value={formData.title}
+              className="w-full p-3 rounded-md border focus:outline-none focus:ring-2 focus:ring-red-500"
+              required
             />
           </div>
 
           {/* Content */}
           <div>
-            <label>Post Content</label>
+            <label className="block text-gray-700 font-semibold">Post Content</label>
             <textarea
-              name="content" value={formData.content} onChange={handleChange}
-              required className="w-full p-3 border rounded h-32"
+              name="content"
+              onChange={handleChange}
+              value={formData.content}
+              className="w-full p-3 rounded-md border focus:outline-none focus:ring-2 focus:ring-red-500 h-32"
+              required
             />
           </div>
 
-          {/* showSkillsLink */}
-          {formData.status==="admin" && (
-            <div>
-              <label className="inline-flex items-center">
-                <input
-                  type="checkbox" name="showSkillsLink"
-                  checked={formData.showSkillsLink}
-                  onChange={handleChange}
-                />
-                <span className="ml-2">Show “Submit Skills” button in mobile</span>
-              </label>
+          {/* Show Skills Link */}
+          {formData.status === "admin" && (
+            <div className="flex items-center">
+              <input
+                type="checkbox"
+                name="showSkillsLink"
+                checked={formData.showSkillsLink}
+                onChange={handleChange}
+                className="mr-2"
+              />
+              <label className="text-gray-700">Include “Submit Skills” Link</label>
             </div>
           )}
 
           {/* Mobile Buttons */}
-          {formData.status==="admin" && (
-            <div className="space-y-2">
-              <h4 className="font-semibold">Mobile Buttons</h4>
-              <div className="flex gap-2">
+          {formData.status === "admin" && (
+            <div className="bg-white border p-4 rounded-md">
+              <h3 className="font-semibold mb-2">Mobile Buttons</h3>
+              <div className="flex gap-2 mb-2">
                 <input
-                  placeholder="Label" value={btnLabel}
-                  onChange={e=>setBtnLabel(e.target.value)}
+                  type="text"
+                  placeholder="Button Label"
+                  value={newButtonLabel}
+                  onChange={e => setNewButtonLabel(e.target.value)}
                   className="flex-1 p-2 border rounded"
                 />
                 <input
-                  placeholder="RouteName" value={btnRoute}
-                  onChange={e=>setBtnRoute(e.target.value)}
+                  type="text"
+                  placeholder="Route Name"
+                  value={newButtonRoute}
+                  onChange={e => setNewButtonRoute(e.target.value)}
                   className="flex-1 p-2 border rounded"
                 />
-                <button
-                  type="button"
-                  onClick={addMobileButton}
-                  className="px-4 bg-blue-600 text-white rounded"
-                >Add</button>
+                <button type="button" onClick={addMobileButton}
+                  className="px-4 py-2 bg-green-600 text-white rounded">
+                  Add
+                </button>
               </div>
-              <ul className="list-disc list-inside">
-                {mobileButtons.map((b,i)=>(
-                  <li key={i}>{b.label} → {b.route}</li>
+              <ul>
+                {mobileButtons.map((btn, i) => (
+                  <li key={i} className="flex justify-between mb-1">
+                    <span>{btn.label} → {btn.route}</span>
+                    <button type="button" onClick={()=>removeMobileButton(i)}
+                      className="text-red-600">✕</button>
+                  </li>
                 ))}
               </ul>
             </div>
@@ -150,46 +193,54 @@ const CreateNews = () => {
 
           {/* Category */}
           <div>
-            <label>Category</label>
+            <label className="block text-gray-700 font-semibold">Category</label>
             <select
-              name="category" value={formData.category}
-              onChange={handleChange} required
-              className="w-full p-3 border rounded"
+              name="category"
+              onChange={handleChange}
+              value={formData.category}
+              className="w-full p-3 rounded-md border focus:outline-none focus:ring-2 focus:ring-red-500"
+              required
             >
-              <option value="">Select…</option>
-              {categories.map(c=>(
-                <option key={c} value={c}>{c}</option>
+              <option value="">Select a Category</option>
+              {categories.map(cat => (
+                <option key={cat} value={cat}>{cat}</option>
               ))}
             </select>
           </div>
 
           {/* Status */}
           <div>
-            <label>Status</label>
+            <label className="block text-gray-700 font-semibold">Status</label>
             <select
-              name="status" value={formData.status}
-              onChange={handleChange} required
-              className="w-full p-3 border rounded"
+              name="status"
+              onChange={handleChange}
+              value={formData.status}
+              className="w-full p-3 rounded-md border focus:outline-none focus:ring-2 focus:ring-red-500"
+              required
             >
-              {statuses.map(s=>(
-                <option key={s} value={s}>{s}</option>
+              {statuses.map(st => (
+                <option key={st} value={st}>{st}</option>
               ))}
             </select>
           </div>
 
           {/* Thumbnail */}
           <div>
-            <label>Upload Thumbnail</label>
+            <label className="block text-gray-700 font-semibold">Upload Thumbnail</label>
             <input
-              type="file" onChange={handleFileChange}
-              className="w-full p-2 border rounded"
+              type="file"
+              onChange={handleFileChange}
+              className="w-full p-2 border rounded-md focus:outline-none file:mr-4 file:py-2 file:px-4 file:rounded file:bg-red-100 file:text-red-600 hover:file:bg-red-200"
             />
           </div>
 
+          {/* Submit */}
           <button
             type="submit"
-            className="w-full py-3 bg-red-600 text-white rounded"
-          >Create News</button>
+            className="w-full py-3 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-md transition-all"
+          >
+            Create News
+          </button>
         </form>
       </div>
     </div>
