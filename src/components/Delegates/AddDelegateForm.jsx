@@ -1,14 +1,11 @@
-// src/pages/AddDelegateForm.jsx
 import React, { useState, useRef, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 import Papa from "papaparse";
 import * as XLSX from "xlsx";
-
-const API = "https://new-hope-e46616a5d911.herokuapp.com";
 
 const AddDelegateForm = () => {
   const navigate = useNavigate();
@@ -20,15 +17,91 @@ const AddDelegateForm = () => {
   const [picture, setPicture] = useState(null);
   const [preview, setPreview] = useState(null);
 
-  // fetch organs
+  // NEW: CSV‑paste state
+  const [csvText, setCsvText] = useState("");
+
+  // Fetch Organ Names
   useEffect(() => {
     axios
-      .get(`${API}/delegateorgans`)
-      .then(r => setOrgans(r.data))
-      .catch(e => console.error(e));
+      .get("https://new-hope-e46616a5d911.herokuapp.com/delegateorgans")
+      .then((r) => setOrgans(r.data))
+      .catch((e) => console.error("Error fetching organs:", e));
   }, []);
 
-  // schema now includes organ_id, engaged, last_engaged
+  // File upload handler (CSV or XLSX)
+  const handleFileUpload = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const ext = file.name.split(".").pop().toLowerCase();
+
+    if (ext === "csv") {
+      Papa.parse(file, {
+        header: true,
+        skipEmptyLines: true,
+        complete: (res) => setDelegates(res.data),
+        error: (err) => console.error("CSV parse error:", err),
+      });
+    } else if (["xlsx", "xls"].includes(ext)) {
+      const reader = new FileReader();
+      reader.onload = (evt) => {
+        const wb = XLSX.read(evt.target.result, { type: "binary" });
+        const ws = wb.Sheets[wb.SheetNames[0]];
+        setDelegates(XLSX.utils.sheet_to_json(ws, { defval: "" }));
+      };
+      reader.readAsBinaryString(file);
+    } else {
+      alert("Unsupported file type. Please upload CSV or XLSX.");
+    }
+  };
+
+  // NEW: Paste‑CSV handler
+  const handlePasteCSV = () => {
+    if (!csvText.trim()) {
+      alert("Please paste some CSV text first.");
+      return;
+    }
+    Papa.parse(csvText, {
+      header: true,
+      skipEmptyLines: true,
+      complete: (res) => setDelegates(res.data),
+      error: (err) => console.error("CSV parse error:", err),
+    });
+  };
+
+  // Bulk submit
+  const handleBulkSubmit = async () => {
+    if (delegates.length === 0) {
+      alert("No delegates to submit.");
+      return;
+    }
+    try {
+      await axios.post(
+        "https://new-hope-e46616a5d911.herokuapp.com/delegates/bulk",
+        { delegates }
+      );
+      setSuccessMessage("Bulk upload successful!");
+      setDelegates([]);
+      setCsvText("");
+    } catch (err) {
+      setErrorMessage(err.response?.data?.error || "Bulk upload failed.");
+    }
+  };
+
+  // Single image upload preview
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    if (!["image/png", "image/jpeg"].includes(file.type)) {
+      alert("Only JPEG/PNG allowed");
+      return;
+    }
+    setPicture(file);
+    const reader = new FileReader();
+    reader.onloadend = () => setPreview(reader.result);
+    reader.readAsDataURL(file);
+  };
+
+  // Zod schema & React‑Hook‑Form
   const schema = z.object({
     name: z.string().min(3),
     role: z.string().min(2),
@@ -37,9 +110,7 @@ const AddDelegateForm = () => {
     address: z.string().min(3),
     constituency: z.string().min(3),
     supportstatus: z.enum(["supports", "opposes", "neutral"]),
-    organ_id: z.string().min(1, "Please select an organ"),
-    engaged: z.boolean().optional(),
-    last_engaged: z.string().optional(),
+    organname: z.string().min(1),
   });
 
   const {
@@ -47,7 +118,6 @@ const AddDelegateForm = () => {
     handleSubmit,
     formState: { errors },
     setValue,
-    watch,
   } = useForm({
     resolver: zodResolver(schema),
     defaultValues: {
@@ -58,207 +128,180 @@ const AddDelegateForm = () => {
       address: "",
       constituency: "",
       supportstatus: "neutral",
-      organ_id: "",
-      engaged: false,
-      last_engaged: "",
+      organname: "",
     },
   });
 
-  // when organ_id changes, also set organname
-  const selectedOrganId = watch("organ_id");
-  useEffect(() => {
-    if (selectedOrganId) {
-      const o = organs.find(o => o.id.toString() === selectedOrganId);
-      if (o) setValue("organname", o.organname);
-    }
-  }, [selectedOrganId, organs, setValue]);
-
-  // handle picture preview
-  const handleFileChange = e => {
-    const file = e.target.files[0];
-    if (!file) return;
-    const allowed = ["image/png","image/jpeg"];
-    if (!allowed.includes(file.type)) {
-      alert("Only JPEG/PNG allowed");
-      return;
-    }
-    setPicture(file);
-    const reader = new FileReader();
-    reader.onloadend = () => setPreview(reader.result);
-    reader.readAsDataURL(file);
-  };
-
-  // CSV / XLSX bulk upload unchanged from you
-  const handleFileUpload = e => {
-    const file = e.target.files[0];
-    if (!file) return;
-    const ext = file.name.split('.').pop().toLowerCase();
-    if (ext === 'csv') {
-      Papa.parse(file, {
-        header: true, skipEmptyLines: true,
-        complete: r => setDelegates(r.data),
-      });
-    } else if (['xlsx','xls'].includes(ext)) {
-      const reader = new FileReader();
-      reader.onload = evt => {
-        const wb = XLSX.read(evt.target.result, { type: 'binary' });
-        const ws = wb.Sheets[wb.SheetNames[0]];
-        setDelegates(XLSX.utils.sheet_to_json(ws, { defval: "" }));
-      };
-      reader.readAsBinaryString(file);
-    } else {
-      alert("Only CSV/XLSX");
-    }
-  };
-  const handleBulkSubmit = async () => {
-    if (!delegates.length) { alert("No data."); return; }
-    try {
-      await axios.post(`${API}/delegates/bulk`, { delegates });
-      alert("Bulk delegates added!");
-      setDelegates([]);
-    } catch (e) {
-      console.error(e);
-      alert(e.response?.data?.error || "Bulk upload failed");
-    }
-  };
-
-  // onSubmit sends ALL fields
-  const onSubmit = async data => {
-    const formData = new FormData();
-    formData.append("name", data.name);
-    formData.append("role", data.role);
-    formData.append("phonenumber", data.phonenumber);
-    formData.append("email", data.email);
-    formData.append("address", data.address);
-    formData.append("constituency", data.constituency);
-    formData.append("supportstatus", data.supportstatus);
-    formData.append("organname", organs.find(o=>o.id.toString()===data.organ_id).organname);
-    formData.append("organ_id", data.organ_id);
-    formData.append("engaged", data.engaged);
-    if (data.last_engaged) {
-      formData.append("last_engaged", data.last_engaged);
-    }
-    if (picture) formData.append("profilepic", picture);
+  // Single form submit
+  const onSubmit = async (fd) => {
+    const data = new FormData();
+    Object.entries(fd).forEach(([k, v]) => data.append(k, v));
+    if (picture) data.append("profilepic", picture);
 
     try {
-      const resp = await axios.post(`${API}/delegates`, formData, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
+      await axios.post(
+        "https://new-hope-e46616a5d911.herokuapp.com/delegates",
+        data,
+        { headers: { "Content-Type": "multipart/form-data" } }
+      );
       setSuccessMessage("Delegate added!");
       setErrorMessage(null);
-      setTimeout(() => navigate(-1), 800);
+      setTimeout(() => navigate("/delegateorgans"), 800);
     } catch (err) {
-      console.error(err);
       setErrorMessage(err.response?.data?.error || "Error adding delegate");
     }
   };
 
   return (
-    <div className="min-h-screen bg-white p-10">
-      <h2 className="text-4xl mb-6">Add Delegate</h2>
+    <div className="min-h-screen bg-white p-10 flex flex-col items-center">
+      <div className="w-full max-w-3xl">
+        <h2 className="text-4xl font-bold mb-6 text-center">Add Delegate</h2>
 
-      {/* Bulk upload */}
-      <div className="mb-8">
-        <label>Upload CSV/XLSX</label>
-        <input type="file" onChange={handleFileUpload} />
-        {delegates.length>0 && (
-          <button onClick={handleBulkSubmit} className="ml-4 bg-blue-600 text-white px-4 py-2">
-            Submit Bulk ({delegates.length})
+        {/* ——— New: Paste CSV Section ——— */}
+        <div className="mb-6">
+          <label className="block mb-2 font-semibold">Paste CSV rows here:</label>
+          <textarea
+            className="w-full p-2 border rounded mb-2 h-32"
+            placeholder="name,role,phonenumber,email,address,constituency,supportstatus,organname,organ_id,engaged,last_engaged"
+            value={csvText}
+            onChange={(e) => setCsvText(e.target.value)}
+          />
+          <button
+            onClick={handlePasteCSV}
+            className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+          >
+            Parse Pasted CSV
           </button>
+        </div>
+
+        {/* ——— File Upload Section ——— */}
+        <div className="mb-6">
+          <label className="block mb-2 font-semibold">Or upload CSV/XLSX</label>
+          <input
+            type="file"
+            accept=".csv, .xlsx, .xls"
+            onChange={handleFileUpload}
+            className="w-full p-2 border rounded"
+          />
+        </div>
+
+        {/* ——— Preview & Bulk Submit ——— */}
+        {delegates.length > 0 && (
+          <div className="bg-gray-50 p-4 rounded shadow mb-6">
+            <h3 className="font-semibold mb-2">Preview ({delegates.length} rows)</h3>
+            <div className="overflow-auto max-h-40 border">
+              <table className="w-full text-sm">
+                <thead className="bg-gray-100">
+                  <tr>
+                    <th className="p-2">Name</th>
+                    <th className="p-2">Role</th>
+                    <th className="p-2">Phone</th>
+                    <th className="p-2">Email</th>
+                    <th className="p-2">Organ</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {delegates.slice(0, 5).map((d, i) => (
+                    <tr key={i} className="border-b">
+                      <td className="p-2">{d.name}</td>
+                      <td className="p-2">{d.role}</td>
+                      <td className="p-2">{d.phonenumber}</td>
+                      <td className="p-2">{d.email}</td>
+                      <td className="p-2">{d.organname}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            <button
+              onClick={handleBulkSubmit}
+              className="mt-4 w-full bg-green-600 text-white py-2 rounded hover:bg-green-700"
+            >
+              Submit Bulk ({delegates.length})
+            </button>
+          </div>
         )}
+
+        {/* ——— Single Delegate Form ——— */}
+        <div className="bg-gray-100 p-8 rounded shadow">
+          <form ref={formRef} onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+            {/* Name & Role */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label className="block mb-1">Name</label>
+                <input
+                  {...register("name")}
+                  className="w-full p-3 border rounded"
+                />
+                {errors.name && <p className="text-red-600">{errors.name.message}</p>}
+              </div>
+              <div>
+                <label className="block mb-1">Role</label>
+                <input
+                  {...register("role")}
+                  className="w-full p-3 border rounded"
+                />
+                {errors.role && <p className="text-red-600">{errors.role.message}</p>}
+              </div>
+            </div>
+
+            {/* Phone & Email */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label className="block mb-1">Phone Number</label>
+                <input {...register("phonenumber")} className="w-full p-3 border rounded" />
+              </div>
+              <div>
+                <label className="block mb-1">Email</label>
+                <input {...register("email")} className="w-full p-3 border rounded" />
+              </div>
+            </div>
+
+            {/* Address & Constituency */}
+            <div>
+              <label className="block mb-1">Address</label>
+              <input {...register("address")} className="w-full p-3 border rounded" />
+            </div>
+            <div>
+              <label className="block mb-1">Constituency</label>
+              <input {...register("constituency")} className="w-full p-3 border rounded" />
+            </div>
+
+            {/* Organ */}
+            <div>
+              <label className="block mb-1">Organ Name</label>
+              <select {...register("organname")} className="w-full p-3 border rounded">
+                <option value="">Select an Organ</option>
+                {organs.map((o) => (
+                  <option key={o.id} value={o.organname}>{o.organname}</option>
+                ))}
+              </select>
+            </div>
+
+            {/* Profile Picture */}
+            <div>
+              <label className="block mb-1">Profile Picture (optional)</label>
+              <input
+                type="file"
+                accept="image/png,image/jpeg"
+                onChange={handleFileChange}
+                className="w-full p-2 border rounded"
+              />
+              {preview && <img src={preview} className="w-24 h-24 rounded-full mt-2" />}
+            </div>
+
+            {/* Submit */}
+            <button className="w-full py-3 bg-red-600 text-white rounded hover:bg-red-700">
+              Add Delegate
+            </button>
+
+            {errorMessage && <p className="text-red-500">{errorMessage}</p>}
+            {successMessage && <p className="text-green-600">{successMessage}</p>}
+          </form>
+        </div>
       </div>
-
-      {/* Individual form */}
-      <form onSubmit={handleSubmit(onSubmit)} ref={formRef} className="space-y-6">
-        {/* name/role */}
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <label>Name</label>
-            <input {...register("name")} className="w-full p-2 border" />
-            {errors.name && <p className="text-red-500">{errors.name.message}</p>}
-          </div>
-          <div>
-            <label>Role</label>
-            <input {...register("role")} className="w-full p-2 border" />
-            {errors.role && <p className="text-red-500">{errors.role.message}</p>}
-          </div>
-        </div>
-
-        {/* phone / email */}
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <label>Phone</label>
-            <input {...register("phonenumber")} className="w-full p-2 border" />
-            {errors.phonenumber && <p className="text-red-500">{errors.phonenumber.message}</p>}
-          </div>
-          <div>
-            <label>Email</label>
-            <input {...register("email")} className="w-full p-2 border" />
-            {errors.email && <p className="text-red-500">{errors.email.message}</p>}
-          </div>
-        </div>
-
-        {/* address / constituency */}
-        <div>
-          <label>Address</label>
-          <input {...register("address")} className="w-full p-2 border" />
-          {errors.address && <p className="text-red-500">{errors.address.message}</p>}
-        </div>
-        <div>
-          <label>Constituency</label>
-          <input {...register("constituency")} className="w-full p-2 border" />
-          {errors.constituency && <p className="text-red-500">{errors.constituency.message}</p>}
-        </div>
-
-        {/* support status / organ select */}
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <label>Support Status</label>
-            <select {...register("supportstatus")} className="w-full p-2 border">
-              <option value="supports">Supports</option>
-              <option value="opposes">Opposes</option>
-              <option value="neutral">Neutral</option>
-            </select>
-          </div>
-          <div>
-            <label>Organ</label>
-            <select {...register("organ_id")} className="w-full p-2 border">
-              <option value="">Select an organ</option>
-              {organs.map(o => (
-                <option key={o.id} value={o.id}>{o.organname}</option>
-              ))}
-            </select>
-            {errors.organ_id && <p className="text-red-500">{errors.organ_id.message}</p>}
-          </div>
-        </div>
-
-        {/* engaged / last_engaged */}
-        <div className="grid grid-cols-2 gap-4 items-center">
-          <div className="flex items-center">
-            <input type="checkbox" {...register("engaged")} id="engaged" className="mr-2" />
-            <label htmlFor="engaged">Engaged?</label>
-          </div>
-          <div>
-            <label>Last Engaged</label>
-            <input type="date" {...register("last_engaged")} className="w-full p-2 border" />
-          </div>
-        </div>
-
-        {/* profile pic */}
-        <div>
-          <label>Profile Picture (png/jpeg)</label>
-          <input type="file" accept=".png,.jpeg,.jpg" onChange={handleFileChange} className="block" />
-          {preview && <img src={preview} alt="Preview" className="w-24 h-24 rounded-full mt-2" />}
-        </div>
-
-        {/* submit */}
-        <button type="submit" className="w-full py-3 bg-red-600 text-white rounded">Submit</button>
-        {errorMessage && <p className="text-red-500">{errorMessage}</p>}
-        {successMessage && <p className="text-green-600">{successMessage}</p>}
-      </form>
     </div>
-);
-
+  );
 };
 
 export default AddDelegateForm;
