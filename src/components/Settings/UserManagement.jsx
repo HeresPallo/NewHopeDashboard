@@ -4,7 +4,7 @@ import axios from "axios";
 
 const API_BASE_URL = "https://new-hope-e46616a5d911.herokuapp.com"; // Production API URL
 
-const UserManagementDashboard = () => {
+export default function UserManagementDashboard() {
   const navigate = useNavigate();
 
   // State for admin user creation form
@@ -17,7 +17,12 @@ const UserManagementDashboard = () => {
   const [mobileUsers, setMobileUsers] = useState([]);
   const [loadingMobileUsers, setLoadingMobileUsers] = useState(true);
 
-  // Fetch mobile users on component mount
+  // State for "Change Your Password" section
+  const [currentPwd, setCurrentPwd] = useState("");
+  const [newPwd, setNewPwd] = useState("");
+  const [confirmPwd, setConfirmPwd] = useState("");
+  const [changingPwd, setChangingPwd] = useState(false);
+
   useEffect(() => {
     fetchMobileUsers();
   }, []);
@@ -34,7 +39,6 @@ const UserManagementDashboard = () => {
     }
   };
 
-  // Handle admin user creation using the /register endpoint
   const handleCreateAdmin = async () => {
     if (!adminName || !adminEmail || !adminPassword) {
       alert("Please fill in all fields to create an admin user.");
@@ -42,12 +46,10 @@ const UserManagementDashboard = () => {
     }
     setCreatingAdmin(true);
     try {
-      // Post to /register instead of /users
-      const response = await axios.post(`${API_BASE_URL}/register`, {
+      await axios.post(`${API_BASE_URL}/register`, {
         name: adminName,
         email: adminEmail,
         password: adminPassword,
-        // The backend code registers as admin if email is provided
       });
       alert("Admin user created successfully!");
       setAdminName("");
@@ -61,29 +63,63 @@ const UserManagementDashboard = () => {
     }
   };
 
-  // Handle deletion of a mobile user
   const handleDeleteMobileUser = async (userId) => {
     if (!window.confirm("Are you sure you want to delete this mobile user?")) return;
     try {
       await axios.delete(`${API_BASE_URL}/mobileusers/${userId}`);
       alert("Mobile user deleted successfully!");
-      fetchMobileUsers(); // Refresh the list after deletion
+      fetchMobileUsers();
     } catch (error) {
       console.error("Error deleting mobile user:", error.response?.data || error);
       alert("Failed to delete mobile user.");
     }
   };
 
+  const handleChangePassword = async () => {
+    if (!currentPwd || !newPwd || newPwd !== confirmPwd) {
+      alert("Please fill in all fields, and make sure new passwords match.");
+      return;
+    }
+    setChangingPwd(true);
+    const token = localStorage.getItem("token");
+    if (!token) {
+      alert("You must be logged in to change your password.");
+      setChangingPwd(false);
+      return;
+    }
+    try {
+      await axios.post(
+        `${API_BASE_URL}/change-password`,
+        { currentPassword: currentPwd, newPassword: newPwd },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      alert("Password changed successfully!");
+      setCurrentPwd("");
+      setNewPwd("");
+      setConfirmPwd("");
+    } catch (error) {
+      console.error("Error changing password:", error.response?.data || error);
+      alert(error.response?.data?.error || "Failed to change password.");
+    } finally {
+      setChangingPwd(false);
+    }
+  };
+
   return (
     <div className="flex flex-col p-8 bg-white min-h-screen">
-      {/* Dashboard Header */}
+      {/* Header */}
       <div className="flex justify-between items-center mb-6 border-b pb-4">
         <h2 className="text-xl font-semibold text-gray-800">User Management Dashboard</h2>
-        
+        <button
+          onClick={() => navigate(-1)}
+          className="text-blue-500 hover:underline"
+        >
+          ← Back
+        </button>
       </div>
 
-      {/* Section: Create Admin User */}
-      <div className="mb-8 p-6 border rounded-lg shadow-sm mt-8">
+      {/* Create Admin User */}
+      <div className="mb-8 p-6 border rounded-lg shadow-sm">
         <h3 className="text-xl font-semibold mb-4">Create Admin User</h3>
         <div className="mb-4">
           <label className="block mb-1">Name</label>
@@ -121,7 +157,46 @@ const UserManagementDashboard = () => {
         </button>
       </div>
 
-      {/* Section: Manage Mobile Users */}
+      {/* Change Your Password */}
+      <div className="mb-8 p-6 border rounded-lg shadow-sm">
+        <h3 className="text-xl font-semibold mb-4">Change Your Password</h3>
+        <div className="mb-4">
+          <label className="block mb-1">Current Password</label>
+          <input
+            type="password"
+            value={currentPwd}
+            onChange={(e) => setCurrentPwd(e.target.value)}
+            className="w-full p-2 border rounded"
+          />
+        </div>
+        <div className="mb-4">
+          <label className="block mb-1">New Password</label>
+          <input
+            type="password"
+            value={newPwd}
+            onChange={(e) => setNewPwd(e.target.value)}
+            className="w-full p-2 border rounded"
+          />
+        </div>
+        <div className="mb-4">
+          <label className="block mb-1">Confirm New Password</label>
+          <input
+            type="password"
+            value={confirmPwd}
+            onChange={(e) => setConfirmPwd(e.target.value)}
+            className="w-full p-2 border rounded"
+          />
+        </div>
+        <button
+          onClick={handleChangePassword}
+          className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition"
+          disabled={changingPwd}
+        >
+          {changingPwd ? "Updating..." : "Update Password"}
+        </button>
+      </div>
+
+      {/* Manage Mobile Users */}
       <div className="p-6 border rounded-lg shadow-sm">
         <h3 className="text-xl font-semibold mb-4">Mobile Users</h3>
         {loadingMobileUsers ? (
@@ -160,6 +235,4 @@ const UserManagementDashboard = () => {
       </div>
     </div>
   );
-};
-
-export default UserManagementDashboard;
+}
