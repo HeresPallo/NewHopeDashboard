@@ -1,97 +1,105 @@
-import React from 'react';
-import { useEffect, useState } from "react";
-import axios from "axios";
+import React, { useEffect, useState } from 'react';
+import axios from 'axios';
+import { FiUser, FiPhone, FiMessageCircle, FiSend, FiCheckCircle } from 'react-icons/fi';
+
+const API_URL = "https://new-hope-e46616a5d911.herokuapp.com";
 
 const MessagesPage = () => {
-    const [messages, setMessages] = useState([]);
-    const [response, setResponse] = useState("");
-    const [selectedMessageId, setSelectedMessageId] = useState(null);
+  const [messages, setMessages] = useState([]);
+  const [responses, setResponses] = useState({});
+  const [sending, setSending] = useState({}); // track per-message sending state
 
-    useEffect(() => {
-        axios.get("https://new-hope-e46616a5d911.herokuapp.com/messages")
-            .then(response => setMessages(response.data))
-            .catch(error => console.error("❌ Error fetching messages:", error));
-    }, []);
+  useEffect(() => {
+    axios.get(`${API_URL}/messages`)
+      .then(res => setMessages(res.data))
+      .catch(err => console.error("❌ Error fetching messages:", err));
+  }, []);
 
-    const handleSendResponse = async () => {
-        if (!selectedMessageId || !response.trim()) {
-            alert("Please enter a response.");
-            return;
-        }
-    
-        try {
-            await axios.post(`https://new-hope-e46616a5d911.herokuapp.com/messages/${selectedMessageId}/respond`, { response });
-            alert("Response sent successfully!");
-    
-            // ✅ Update message list after response
-            setMessages(messages.map(msg => 
-                msg.id === selectedMessageId ? { ...msg, admin_response: response } : msg
-            ));
-    
-            setResponse("");
-            setSelectedMessageId(null);
-        } catch (error) {
-            console.error("❌ Error sending response:", error);
-            alert("Failed to send response.");
-        }
-    };
-    
+  const handleResponseChange = (id, text) => {
+    setResponses(prev => ({ ...prev, [id]: text }));
+  };
 
-    return (
-        <div className="flex flex-col p-8 bg-white min-h-screen">
-            <h2 className="text-xl font-semibold text-gray-800 mb-4">User Messages</h2>
+  const handleSendResponse = async (id) => {
+    const responseText = (responses[id] || "").trim();
+    if (!responseText) {
+      alert("Please enter a response.");
+      return;
+    }
+    setSending(prev => ({ ...prev, [id]: true }));
+    try {
+      await axios.post(`${API_URL}/messages/${id}/respond`, { response: responseText });
+      // update local list
+      setMessages(msgs => msgs.map(m =>
+        m.id === id ? { ...m, admin_response: responseText } : m
+      ));
+      delete responses[id];
+    } catch (err) {
+      console.error("❌ Error sending response:", err);
+      alert("Failed to send response.");
+    } finally {
+      setSending(prev => ({ ...prev, [id]: false }));
+    }
+  };
 
-            <div className="bg-white shadow-sm border rounded-lg">
-                <table className="w-full border-collapse text-sm">
-                    <thead>
-                        <tr className="text-gray-600 bg-gray-100 border-b">
-                            <th className="p-3 text-left">Name</th>
-                            <th className="p-3 text-left">Phone</th>
-                            <th className="p-3 text-left">Message</th>
-                            <th className="p-3 text-left">Response</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {messages.length === 0 ? (
-                            <tr>
-                                <td colSpan="4" className="text-center text-gray-500 p-4">
-                                    No messages yet.
-                                </td>
-                            </tr>
-                        ) : (
-                            messages.map((msg) => (
-                                <tr key={msg.id} className="border-b hover:bg-gray-50">
-                                    <td className="p-3">{msg.name}</td>
-                                    <td className="p-3">{msg.phone}</td>
-                                    <td className="p-3">{msg.message}</td>
-                                    <td className="p-3">
-    {msg.admin_response ? (
-        <p className="text-green-600">{msg.admin_response}</p>
-    ) : (
-        <input
-            type="text"
-            className="border p-2 rounded w-full"
-            value={selectedMessageId === msg.id ? response : ""}
-            onChange={(e) => {
-                setSelectedMessageId(msg.id);
-                setResponse(e.target.value);
-            }}
-        />
-    )}
-    {!msg.admin_response && (
-        <button onClick={handleSendResponse} className="mt-2 px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700">
-            Send Response
-        </button>
-    )}
-</td>
-                                </tr>
-                            ))
-                        )}
-                    </tbody>
-                </table>
+  return (
+    <div className="min-h-screen bg-gray-100 p-6">
+      <h2 className="text-2xl font-bold text-gray-800 mb-6">User Messages</h2>
+      <div className="space-y-4">
+        {messages.length === 0 ? (
+          <p className="text-center text-gray-500">No messages yet.</p>
+        ) : messages.map(msg => (
+          <div
+            key={msg.id}
+            className="bg-white p-6 rounded-xl shadow hover:shadow-lg transition"
+          >
+            {/* Header: name & phone */}
+            <div className="flex items-center mb-4 space-x-4">
+              <div className="flex items-center text-gray-700 space-x-2">
+                <FiUser size={20} />
+                <span className="font-medium">{msg.name}</span>
+              </div>
+              <div className="flex items-center text-gray-500 space-x-2">
+                <FiPhone size={18} />
+                <span>{msg.phone}</span>
+              </div>
             </div>
-        </div>
-    );
+
+            {/* Message Body */}
+            <div className="flex items-start text-gray-800 space-x-3 mb-4">
+              <FiMessageCircle size={22} className="mt-1 text-red-500" />
+              <p className="leading-relaxed">{msg.message}</p>
+            </div>
+
+            {/* Admin response or input */}
+            {msg.admin_response ? (
+              <div className="flex items-center text-green-700 space-x-2">
+                <FiCheckCircle size={18} />
+                <span className="italic">“{msg.admin_response}”</span>
+              </div>
+            ) : (
+              <div className="mt-4 flex flex-col sm:flex-row sm:items-center sm:space-x-3">
+                <input
+                  type="text"
+                  placeholder="Type your response…"
+                  className="flex-1 border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-red-400"
+                  value={responses[msg.id] || ''}
+                  onChange={e => handleResponseChange(msg.id, e.target.value)}
+                />
+                <button
+                  onClick={() => handleSendResponse(msg.id)}
+                  disabled={sending[msg.id]}
+                  className="mt-2 sm:mt-0 flex items-center bg-green-600 hover:bg-green-700 text-white font-semibold px-4 py-2 rounded-lg transition disabled:opacity-50"
+                >
+                  <FiSend className="mr-2" /> 
+                  {sending[msg.id] ? 'Sending…' : 'Send'}
+                </button>
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
 };
 
 export default MessagesPage;
