@@ -31,7 +31,15 @@ const CreateSurvey = () => {
         }
 
         try {
-            await axios.post("https://new-hope-e46616a5d911.herokuapp.com/surveys", { title: surveyTitle, description, questions });
+            await axios.post(
+                "https://new-hope-e46616a5d911.herokuapp.com/surveys",
+                { title: surveyTitle, description, questions },
+                {
+                  headers: {
+                    Authorization: `Bearer ${localStorage.getItem("token")}` // or sessionStorage
+                  }
+                }
+              );
             alert("Survey created successfully!");
             navigate("/contactsdashboard");
         } catch (error) {
