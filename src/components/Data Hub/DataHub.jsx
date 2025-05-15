@@ -33,8 +33,16 @@ const DataHubDashboard = () => {
     };
 
     const request = form.id
-      ? axios.put(`${API_URL}/${form.id}`, payload)
-      : axios.post(API_URL, payload);
+      ? axios.put(`${API_URL}/${form.id}`, payload, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`
+        }
+      })
+      : axios.post(API_URL, payload, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`
+        }
+      });      
 
     request
       .then((res) => {
