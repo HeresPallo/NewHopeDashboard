@@ -142,6 +142,17 @@ export default function UserManagementDashboard() {
           />
         </div>
         <div className="mb-4">
+  <label className="block mb-1">Role</label>
+  <select
+    value={adminRole}
+    onChange={(e) => setAdminRole(e.target.value)}
+    className="w-full p-2 border rounded"
+  >
+    <option value="superuser">Superuser</option>
+    <option value="admin_viewer">Admin Viewer</option>
+  </select>
+</div>
+        <div className="mb-4">
           <label className="block mb-1">Password</label>
           <input
             type="password"
