@@ -32,6 +32,7 @@ import Forms from './Forms/Forms';
 import ConfirmationJournalForm from './Forms/ConfirmationJournalForm';
 import NewApplicantJournalForm from './Forms/NewApplicantJournalForm';
 import RegistrationRejectionForm from './Forms/RegistrationRejectionForm';
+import DataHubDashboard from './Data Hub/DataHub';
 
 const AllRouting = () => {
     const [isAuthenticated, setIsAuthenticated] = useState(!!localStorage.getItem("token"));
@@ -85,6 +86,7 @@ const AllRouting = () => {
                             <Route path="/forms/confirmation" element={<ConfirmationJournalForm/>} />
                             <Route path="/forms/newapplicant" element={<NewApplicantJournalForm/>} />
                             <Route path="/forms/rrf" element={<RegistrationRejectionForm/>} />
+                            <Route path="/datahub" element={<DataHubDashboard/>} />
                         </>
                     ) : (
                         <Route path="*" element={<Navigate to="/login" />} />
