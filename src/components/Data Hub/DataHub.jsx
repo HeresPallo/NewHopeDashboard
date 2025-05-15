@@ -100,12 +100,26 @@ const DataHubDashboard = () => {
           className="w-full px-4 py-2 border rounded"
         />
 
-        <button
-          onClick={handleSubmit}
-          className="mt-4 px-6 py-2 bg-red-600 text-white font-semibold rounded hover:bg-red-700"
-        >
-          {form.id ? "Update Section" : "+ Add Section"}
-        </button>
+<div className="mt-4 flex gap-4">
+  <button
+    onClick={handleSubmit}
+    className="px-6 py-2 bg-red-600 text-white font-semibold rounded hover:bg-red-700"
+  >
+    {form.id ? "Update Section" : "+ Add Section"}
+  </button>
+
+  {form.id && (
+    <button
+      onClick={() =>
+        setForm({ id: null, title: "", type: "text", data: "" })
+      }
+      className="px-6 py-2 bg-gray-300 text-gray-800 font-semibold rounded hover:bg-gray-400"
+    >
+      Cancel
+    </button>
+  )}
+</div>
+
       </div>
 
       {/* Existing Sections List */}
