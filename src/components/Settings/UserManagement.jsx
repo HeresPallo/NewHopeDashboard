@@ -10,6 +10,7 @@ export default function UserManagementDashboard() {
   // State for admin user creation form
   const [adminName, setAdminName] = useState("");
   const [adminEmail, setAdminEmail] = useState("");
+  const [adminRole, setAdminRole] = useState("admin_viewer");
   const [adminPassword, setAdminPassword] = useState("");
   const [creatingAdmin, setCreatingAdmin] = useState(false);
 
@@ -50,7 +51,8 @@ export default function UserManagementDashboard() {
         name: adminName,
         email: adminEmail,
         password: adminPassword,
-      });
+        role: adminRole, // 👈 added role here
+      });      
       alert("Admin user created successfully!");
       setAdminName("");
       setAdminEmail("");
