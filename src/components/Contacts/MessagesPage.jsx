@@ -43,7 +43,18 @@ const MessagesPage = () => {
     if (!responseText) return alert("Please enter a response.");
     setSending(prev => ({ ...prev, [id]: true }));
     try {
-      await axios.post(`${API_URL}/messages/${id}/respond`, { response: responseText });
+      const token = localStorage.getItem("token");
+      await axios.post(
+        `${API_URL}/messages/${id}/respond`,
+        { response: responseText },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      console.log("🔐 Token being sent:", token);      
       setMessages(ms =>
         ms.map(m => (m.id === id ? { ...m, admin_response: responseText } : m))
       );
