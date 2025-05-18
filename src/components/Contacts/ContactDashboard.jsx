@@ -9,14 +9,24 @@ const ContactsDashboard = () => {
   const [skills, setSkills] = useState([]); // Skills fetched from the database
 
   useEffect(() => {
-    axios.get("https://new-hope-e46616a5d911.herokuapp.com/surveys")
+    const token = localStorage.getItem("token"); // Adjust if you're storing it differently
+  
+    if (!token) {
+      console.warn("⚠️ No token found in localStorage");
+      return;
+    }
+  
+    axios.get("https://new-hope-e46616a5d911.herokuapp.com/surveys", {
+      headers: { Authorization: `Bearer ${token}` }
+    })
       .then(response => setSurveys(response.data))
-      .catch(error => console.error("❌ Error fetching surveys:", error));
-
+      .catch(error => console.error("❌ Error fetching surveys:", error.response?.data || error));
+  
     axios.get("https://new-hope-e46616a5d911.herokuapp.com/skills-directory")
       .then(response => setSkills(response.data))
       .catch(error => console.error("❌ Error fetching skills:", error));
   }, []);
+  
 
   return (
     <div className="flex flex-col p-8 bg-white min-h-screen">
