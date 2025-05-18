@@ -149,7 +149,7 @@ export default function UserManagementDashboard() {
     className="w-full p-2 border rounded"
   >
     <option value="superuser">Superuser</option>
-    <option value="admin_viewer">Admin Viewer</option>
+    <option value="admin_viewer">Admin Viewer</option> 
   </select>
 </div>
         <div className="mb-4">
