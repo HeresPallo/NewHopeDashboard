@@ -3,7 +3,7 @@ import { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 
-const API_BASE_URL = "https://new-hope-e46616a5d911.herokuapp.com"; // Production API URL
+const API_BASE_URL = "https://new-hope-8796c77630ff.herokuapp.com"; // Production API URL
 
 const AuthPage = ({ type }) => {
     const navigate = useNavigate();
