@@ -33,6 +33,7 @@ import ConfirmationJournalForm from './Forms/ConfirmationJournalForm';
 import NewApplicantJournalForm from './Forms/NewApplicantJournalForm';
 import RegistrationRejectionForm from './Forms/RegistrationRejectionForm';
 import DataHubDashboard from './Data Hub/DataHub';
+import CreateForm from './Forms/CreateForm';
 
 const AllRouting = () => {
     const [isAuthenticated, setIsAuthenticated] = useState(!!localStorage.getItem("token"));
@@ -83,6 +84,7 @@ const AllRouting = () => {
                             <Route path="/skills-directory" element={<SkillsDirectoryDashboard />} />
                             <Route path="/user-management" element={<UserManagementDashboard />} />
                             <Route path="/forms" element={<Forms/>} />
+                            <Route path="/forms/create" element={<CreateForm/>} />
                             <Route path="/forms/confirmation" element={<ConfirmationJournalForm/>} />
                             <Route path="/forms/newapplicant" element={<NewApplicantJournalForm/>} />
                             <Route path="/forms/rrf" element={<RegistrationRejectionForm/>} />
