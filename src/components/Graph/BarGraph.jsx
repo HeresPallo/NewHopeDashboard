@@ -30,7 +30,7 @@ const BarGraph = () => {
 
   useEffect(() => {
     // Fetch data from the backend API
-    axios.get('https://new-hope-e46616a5d911.herokuapp.com/monthlydelegates')
+    axios.get('https://new-hope-8796c77630ff.herokuapp.com/monthlydelegates')
       .then(response => {
         const data = response.data;
         

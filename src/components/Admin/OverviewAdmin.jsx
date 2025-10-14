@@ -14,7 +14,7 @@ import {
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
-const API = 'https://new-hope-e46616a5d911.herokuapp.com';
+const API = 'https://new-hope-8796c77630ff.herokuapp.com';
 
 export default function OverviewAdmin() {
   const navigate = useNavigate();

@@ -3,7 +3,7 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import * as XLSX from "xlsx";
 
-const API_BASE_URL = "https://new-hope-e46616a5d911.herokuapp.com";
+const API_BASE_URL = "https://new-hope-8796c77630ff.herokuapp.com";
 
 const RegistrationRejectionForm = () => {
   const [formData, setFormData] = useState({

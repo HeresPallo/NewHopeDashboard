@@ -10,7 +10,7 @@ const FundraiserDashboard = () => {
 
     // Fetch wallet balance
     useEffect(() => {
-        axios.get("https://new-hope-e46616a5d911.herokuapp.com/wallet")
+        axios.get("https://new-hope-8796c77630ff.herokuapp.com/wallet")
             .then(response => setWallet(response.data.balance))
             .catch(error => console.error("Error fetching wallet balance:", error));
     }, [currency]);

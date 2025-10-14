@@ -24,7 +24,7 @@ const EditCampaign = () => {
   const paymentOptions = ["Apple Pay", "Orange Money", "PayPal", "Stripe", "Afrimoney", "Vult"];
 
   useEffect(() => {
-    axios.get(`https://new-hope-e46616a5d911.herokuapp.com/campaigns/${id}`)
+    axios.get(`https://new-hope-8796c77630ff.herokuapp.com/campaigns/${id}`)
       .then(response => {
         const campaignData = response.data;
         let parsedPaymentMethods = [];
@@ -82,7 +82,7 @@ const EditCampaign = () => {
         }
       });
   
-      await axios.patch(`https://new-hope-e46616a5d911.herokuapp.com/campaigns/${id}`, data, {
+      await axios.patch(`https://new-hope-8796c77630ff.herokuapp.com/campaigns/${id}`, data, {
         headers: { "Content-Type": "multipart/form-data" },
       });
   

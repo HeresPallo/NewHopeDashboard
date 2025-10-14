@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
-const API_BASE_URL = "https://new-hope-e46616a5d911.herokuapp.com"; // Production API URL
+const API_BASE_URL = "https://new-hope-8796c77630ff.herokuapp.com"; // Production API URL
 
 export default function UserManagementDashboard() {
   const navigate = useNavigate();

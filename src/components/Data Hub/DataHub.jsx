@@ -1,15 +1,19 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 
-const DataHubDashboard = () => {
+const RESOLVED_API_BASE = "https://new-hope-8796c77630ff.herokuapp.com";
+const api = axios.create({ baseURL: RESOLVED_API_BASE }); // hard-force the new API
+
+export default function DataHubDashboard() {
   const [sections, setSections] = useState([]);
   const [jsonError, setJsonError] = useState(null);
   const [form, setForm] = useState({ id: null, title: "", type: "text", data: "" });
 
-  const API_URL = "https://new-hope-e46616a5d911.herokuapp.com/datahub";
-
   useEffect(() => {
-    axios.get(API_URL)
+    console.log("[DataHub] Using API base:", RESOLVED_API_BASE);
+    // GET is public — no auth/header => no preflight
+    api
+      .get("/datahub", { params: { t: Date.now() } })
       .then((res) => setSections(res.data))
       .catch((err) => console.error("Error fetching datahub:", err));
   }, []);
@@ -28,16 +32,19 @@ const DataHubDashboard = () => {
   };
 
   const handleSubmit = () => {
+    const token = localStorage.getItem("token") || "";
     const payload = { title: form.title, type: form.type, data: form.data };
-    const request = form.id
-      ? axios.put(`${API_URL}/${form.id}`, payload, { headers: { Authorization: `Bearer ${localStorage.getItem("token")}` } })
-      : axios.post(API_URL, payload, { headers: { Authorization: `Bearer ${localStorage.getItem("token")}` } });
+    const headers = token ? { Authorization: `Bearer ${token}` } : undefined;
 
-    request
+    const req = form.id
+      ? api.put(`/datahub/${form.id}`, payload, { headers })
+      : api.post("/datahub", payload, { headers });
+
+    req
       .then(() => {
         alert(form.id ? "Section updated!" : "Section created!");
         setForm({ id: null, title: "", type: "text", data: "" });
-        return axios.get(API_URL);
+        return api.get("/datahub", { params: { t: Date.now() } }); // refresh list
       })
       .then((res) => setSections(res.data))
       .catch((err) => {
@@ -47,16 +54,27 @@ const DataHubDashboard = () => {
   };
 
   const handleEdit = (section) => {
-    setForm({ id: section.id, title: section.title, type: section.type, data: JSON.stringify(section.data, null, 2) });
+    setForm({
+      id: section.id,
+      title: section.title,
+      type: section.type,
+      data:
+        section.type === "comparative"
+          ? JSON.stringify(section.data, null, 2)
+          : typeof section.data === "string"
+          ? section.data
+          : String(section.data ?? ""),
+    });
   };
 
   const handleDelete = (id) => {
     if (!window.confirm("Are you sure you want to delete this section?")) return;
-    axios.delete(`${API_URL}/${id}`, { headers: { Authorization: `Bearer ${localStorage.getItem("token")}` } })
-      .then(() => {
-        alert("Section deleted.");
-        return axios.get(API_URL);
-      })
+    const token = localStorage.getItem("token") || "";
+    const headers = token ? { Authorization: `Bearer ${token}` } : undefined;
+
+    api
+      .delete(`/datahub/${id}`, { headers })
+      .then(() => api.get("/datahub", { params: { t: Date.now() } }))
       .then((res) => setSections(res.data))
       .catch((err) => {
         console.error("❌ Error deleting section:", err);
@@ -102,7 +120,7 @@ const DataHubDashboard = () => {
         <div className="mt-4 flex gap-4">
           <button
             onClick={handleSubmit}
-            disabled={jsonError}
+            disabled={!!jsonError}
             className={`px-6 py-2 font-semibold rounded-md transition ${
               jsonError ? "bg-gray-300 text-gray-500 cursor-not-allowed" : "bg-red-600 text-white hover:bg-red-700"
             }`}
@@ -130,16 +148,10 @@ const DataHubDashboard = () => {
             <h3 className="font-bold text-lg text-gray-800 mb-1 truncate">{section.title}</h3>
             <p className="text-xs text-gray-500 mb-3 italic">Type: {section.type}</p>
             <div className="flex justify-between">
-              <button
-                onClick={() => handleEdit(section)}
-                className="text-blue-600 text-sm hover:underline"
-              >
+              <button onClick={() => handleEdit(section)} className="text-blue-600 text-sm hover:underline">
                 Edit
               </button>
-              <button
-                onClick={() => handleDelete(section.id)}
-                className="text-red-600 text-sm hover:underline"
-              >
+              <button onClick={() => handleDelete(section.id)} className="text-red-600 text-sm hover:underline">
                 Delete
               </button>
             </div>
@@ -148,6 +160,4 @@ const DataHubDashboard = () => {
       </div>
     </div>
   );
-};
-
-export default DataHubDashboard;
+}

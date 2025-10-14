@@ -12,7 +12,7 @@ import {
   FiXCircle
 } from 'react-icons/fi';
 
-const API_URL = "https://new-hope-e46616a5d911.herokuapp.com";
+const API_URL = "https://new-hope-8796c77630ff.herokuapp.com";
 
 const MessagesPage = () => {
   const navigate = useNavigate();

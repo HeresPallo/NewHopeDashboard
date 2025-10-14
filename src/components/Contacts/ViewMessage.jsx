@@ -11,7 +11,7 @@ const ViewMessage = () => {
     const [error, setError] = useState(null);
 
     useEffect(() => {
-        axios.get(`https://new-hope-e46616a5d911.herokuapp.com/messages/${id}`)
+        axios.get(`https://new-hope-8796c77630ff.herokuapp.com/messages/${id}`)
             .then(response => {
                 console.log(response.data); // Check what data is being returned
                 setMessage(response.data);

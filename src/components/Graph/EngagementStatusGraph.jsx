@@ -10,7 +10,7 @@ import {
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
-const API_BASE_URL = "https://new-hope-e46616a5d911.herokuapp.com";
+const API_BASE_URL = "https://new-hope-8796c77630ff.herokuapp.com";
 
 const EngagementStatusGraph = ({ organname }) => {
   const [counts, setCounts] = useState({ engaged_count: 0, not_engaged_count: 0 });

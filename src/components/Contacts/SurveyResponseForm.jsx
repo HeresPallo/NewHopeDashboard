@@ -24,7 +24,7 @@ const SurveyResponseForm = ({ survey }) => {
     e.preventDefault();
     
     try {
-      await axios.post("https://new-hope-e46616a5d911.herokuapp.com/surveyresponses", {
+      await axios.post("https://new-hope-8796c77630ff.herokuapp.com/surveyresponses", {
         name,
         email,
         answers,

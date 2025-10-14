@@ -13,7 +13,7 @@ import {
 import axios from "axios";
 import ShareFormModal from "./ShareFormModal";
 
-const API_BASE_URL = "https://new-hope-e46616a5d911.herokuapp.com";
+const API_BASE_URL = "https://new-hope-8796c77630ff.herokuapp.com";
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 

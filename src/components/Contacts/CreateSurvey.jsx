@@ -32,7 +32,7 @@ const CreateSurvey = () => {
 
         try {
             await axios.post(
-                "https://new-hope-e46616a5d911.herokuapp.com/surveys",
+                "https://new-hope-8796c77630ff.herokuapp.com/surveys",
                 { title: surveyTitle, description, questions },
                 {
                   headers: {
