@@ -7,6 +7,29 @@ const API_BASE =
   process.env.NEXT_PUBLIC_API_BASE ||
   "https://new-hope-8796c77630ff.herokuapp.com";
 
+// very small, safe escape to avoid accidental HTML injection from plain text
+function escapeHtml(str) {
+  return String(str)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
+
+// convert plain text (with blank lines) to HTML paragraphs + <br/>
+function textToHtml(text) {
+  if (!text || !text.trim()) return "";
+  // split on 2+ consecutive newlines to form paragraphs
+  const paragraphs = text
+    .trim()
+    .split(/\n{2,}/)
+    .map(block => {
+      const safe = escapeHtml(block).replace(/\n/g, "<br/>");
+      return `<p>${safe}</p>`;
+    });
+  return paragraphs.join("");
+}
+
 function decodeJwt(t) {
   try {
     const payload = t.split(".")[1];
@@ -19,13 +42,12 @@ function decodeJwt(t) {
 const CreateNews = () => {
   const navigate = useNavigate();
   const token = localStorage.getItem("token");
-  const storedRole = localStorage.getItem("role"); // set during login response
+  const storedRole = localStorage.getItem("role");
   const decoded = token ? decodeJwt(token) : null;
 
-  // derive default role safely
   const effectiveRole =
-    (decoded && decoded.role) || // if your token contains role (mobile login does)
-    (storedRole ? storedRole : "user"); // fallback to localStorage or user
+    (decoded && decoded.role) ||
+    (storedRole ? storedRole : "user");
 
   const [formData, setFormData] = useState({
     title: "",
@@ -41,10 +63,10 @@ const CreateNews = () => {
   const [newButtonRoute, setNewButtonRoute] = useState("");
 
   const categories = [
-    "Art", "Business", "Culture", "Education", "Economy", "Elderly Care",
-    "Entertainment", "Environment", "Health", "Labor", "Local News",
-    "Other", "Political Support", "Presidential Campaign", "Science",
-    "Social Issues", "Sports", "Technology", "Transportation", "Youth"
+    "Art","Business","Culture","Education","Economy","Elderly Care",
+    "Entertainment","Environment","Health","Labor","Local News",
+    "Other","Political Support","Presidential Campaign","Science",
+    "Social Issues","Sports","Technology","Transportation","Youth"
   ];
   const statuses = ["admin", "user"];
 
@@ -87,14 +109,11 @@ const CreateNews = () => {
     try {
       const data = new FormData();
       data.append("title", formData.title);
-      data.append("content", formData.content);
+      // ✨ convert the textarea text into HTML so mobile renders paragraphs nicely
+      const htmlContent = textToHtml(formData.content);
+      data.append("content", htmlContent);
       data.append("category", formData.category);
-
-      // NOTE: your current backend REQUIRES status in body; keep sending it for now.
-      // (Server should really derive this from req.user.role.)
       data.append("status", formData.status);
-
-      // optional flags used by your future backend patch
       data.append("showSkillsLink", String(formData.showSkillsLink));
       data.append("mobile_buttons", JSON.stringify(mobileButtons));
 
@@ -102,7 +121,6 @@ const CreateNews = () => {
         data.append("thumbnail", formData.thumbnail);
       }
 
-      // IMPORTANT: don't set Content-Type; axios will add the boundary.
       await axios.post(`${API_BASE}/news`, data, {
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -121,7 +139,6 @@ const CreateNews = () => {
         <h2 className="text-4xl font-bold text-gray-900 text-center mb-6">Create News Story</h2>
 
         <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Title */}
           <div>
             <label className="block text-gray-700 font-semibold">Post Title</label>
             <input
@@ -134,19 +151,18 @@ const CreateNews = () => {
             />
           </div>
 
-          {/* Content */}
           <div>
             <label className="block text-gray-700 font-semibold">Post Content</label>
             <textarea
               name="content"
               onChange={handleChange}
               value={formData.content}
-              className="w-full p-3 rounded-md border focus:outline-none focus:ring-2 focus:ring-red-500 h-32"
+              placeholder={"Write your post. Use blank lines between paragraphs.\nSingle newlines will be preserved inside a paragraph."}
+              className="w-full p-3 rounded-md border focus:outline-none focus:ring-2 focus:ring-red-500 h-40"
               required
             />
           </div>
 
-          {/* Show Skills Link (admin only) */}
           {formData.status === "admin" && (
             <div className="flex items-center">
               <input
@@ -160,7 +176,6 @@ const CreateNews = () => {
             </div>
           )}
 
-          {/* Mobile Buttons (admin only) */}
           {formData.status === "admin" && (
             <div className="bg-white border p-4 rounded-md">
               <h3 className="font-semibold mb-2">Mobile Buttons</h3>
@@ -194,7 +209,6 @@ const CreateNews = () => {
             </div>
           )}
 
-          {/* Category */}
           <div>
             <label className="block text-gray-700 font-semibold">Category</label>
             <select
@@ -211,7 +225,6 @@ const CreateNews = () => {
             </select>
           </div>
 
-          {/* Status (visible for now because backend requires it) */}
           <div>
             <label className="block text-gray-700 font-semibold">Status</label>
             <select
@@ -227,7 +240,6 @@ const CreateNews = () => {
             </select>
           </div>
 
-          {/* Thumbnail */}
           <div>
             <label className="block text-gray-700 font-semibold">Upload Thumbnail</label>
             <input
@@ -237,7 +249,6 @@ const CreateNews = () => {
             />
           </div>
 
-          {/* Submit */}
           <button
             type="submit"
             className="w-full py-3 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-md transition-all"
