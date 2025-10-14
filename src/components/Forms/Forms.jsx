@@ -1,3 +1,4 @@
+// src/pages/Forms.jsx
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Bar } from "react-chartjs-2";
@@ -14,23 +15,23 @@ import axios from "axios";
 import ShareFormModal from "./ShareFormModal";
 
 const API_BASE_URL = "https://new-hope-8796c77630ff.herokuapp.com";
-
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
-const Forms = () => {
+export default function Forms() {
   const navigate = useNavigate();
+
   const [shareModalOpen, setShareModalOpen] = useState(false);
   const [currentFormToShare, setCurrentFormToShare] = useState("");
 
-  // submission counts
   const [confirmationCount, setConfirmationCount] = useState(0);
   const [newApplicantCount, setNewApplicantCount] = useState(0);
   const [rrfCount, setRrfCount] = useState(0);
 
-  // ** new state for active shared passwords **
   const [activeShares, setActiveShares] = useState([]);
 
-  // fetch the three form‐submission counts
+  // NEW: custom templates
+  const [templates, setTemplates] = useState([]);
+
   const fetchSubmissionCounts = async () => {
     try {
       const [cRes, naRes, rrfRes] = await Promise.all([
@@ -46,7 +47,6 @@ const Forms = () => {
     }
   };
 
-  // fetch the table of shared passwords + who got them
   const fetchActiveShares = async () => {
     try {
       const res = await axios.get(`${API_BASE_URL}/sharedForms`);
@@ -56,12 +56,21 @@ const Forms = () => {
     }
   };
 
+  const fetchTemplates = async () => {
+    try {
+      const { data } = await axios.get(`${API_BASE_URL}/forms/templates`);
+      setTemplates(Array.isArray(data) ? data : []);
+    } catch (err) {
+      console.error("Error fetching templates:", err);
+    }
+  };
+
   useEffect(() => {
     fetchSubmissionCounts();
     fetchActiveShares();
+    fetchTemplates();
   }, []);
 
-  // bar‑chart data
   const formSubmissions = [
     { form: "Confirmation Journal", count: confirmationCount },
     { form: "New Applicant Journal", count: newApplicantCount },
@@ -76,7 +85,6 @@ const Forms = () => {
     }]
   };
 
-  // share handler (unchanged)
   const handleShareForm = (formName, sharePassword, selectedUserIds) => {
     axios.post(`${API_BASE_URL}/shareForm`, {
       formName,
@@ -85,7 +93,7 @@ const Forms = () => {
     })
     .then(() => {
       alert(`"${formName}" form successfully shared.`);
-      fetchActiveShares();             // refresh table
+      fetchActiveShares();
     })
     .catch(err => {
       console.error("Error sharing form:", err);
@@ -93,7 +101,6 @@ const Forms = () => {
     });
   };
 
-  // delete a shared‐password entry
   const handleDeleteShare = async (id) => {
     if (!window.confirm("Delete this share password?")) return;
     try {
@@ -113,10 +120,19 @@ const Forms = () => {
 
   return (
     <div className="min-h-screen bg-white flex flex-col items-center p-6">
-      <h1 className="text-4xl font-bold text-gray-900 mb-8">Forms Dashboard</h1>
-      
+      <div className="w-full max-w-6xl flex items-center justify-between mb-6">
+        <h1 className="text-4xl font-bold text-gray-900">Forms Dashboard</h1>
+        {/* NEW: Create Form */}
+        <button
+          onClick={() => navigate("/forms/create")}
+          className="px-5 py-2 bg-red-600 text-white font-medium rounded-md hover:bg-red-700 transition"
+        >
+          + Create Form
+        </button>
+      </div>
+
       {/* Graph */}
-      <div className="w-full max-w-4xl mb-12">
+      <div className="w-full max-w-6xl mb-12">
         <h2 className="text-2xl font-semibold text-gray-800 mb-4">
           Form Submissions Overview
         </h2>
@@ -132,8 +148,8 @@ const Forms = () => {
         />
       </div>
 
-      {/* Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full max-w-5xl">
+      {/* Fixed forms cards */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full max-w-6xl">
         {[
           ["Confirmation Journal", confirmationCount, "/forms/confirmation"],
           ["New Applicant Journal", newApplicantCount, "/forms/newapplicant"],
@@ -159,6 +175,49 @@ const Forms = () => {
         ))}
       </div>
 
+      {/* NEW: Custom forms/templates list */}
+      <div className="mt-12 w-full max-w-6xl">
+        <h2 className="text-2xl font-semibold text-gray-800 mb-4">Custom Forms</h2>
+        <div className="overflow-x-auto">
+          <table className="w-full border-collapse">
+            <thead className="bg-gray-100 text-gray-600">
+              <tr>
+                <th className="p-3 text-left">Name</th>
+                <th className="p-3 text-left">Fields</th>
+                <th className="p-3 text-left">Created</th>
+                <th className="p-3 text-left">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {templates.length === 0 ? (
+                <tr>
+                  <td colSpan="4" className="p-3 text-center text-gray-500">
+                    No custom forms yet. Click “Create Form” to add one.
+                  </td>
+                </tr>
+              ) : (
+                templates.map(t => (
+                  <tr key={t.id} className="border-b hover:bg-gray-50">
+                    <td className="p-3 font-medium">{t.name}</td>
+                    <td className="p-3">{Array.isArray(t.fields) ? t.fields.length : 0}</td>
+                    <td className="p-3">{new Date(t.created_at).toLocaleString()}</td>
+                    <td className="p-3">
+                      <button
+                        onClick={() => navigate(`/forms/templates/${t.id}`)}
+                        className="px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 mr-2"
+                      >
+                        View
+                      </button>
+                      {/* optional future: share dynamic forms via your existing /shareForm */}
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
       {shareModalOpen && (
         <ShareFormModal
           formName={currentFormToShare}
@@ -167,10 +226,8 @@ const Forms = () => {
         />
       )}
 
-      {/* ——————————————————————————————————————
-           NEW: Active Shared Passwords Table
-         —————————————————————————————————————— */}
-      <div className="mt-12 w-full max-w-5xl">
+      {/* Active shared forms/passwords table (unchanged) */}
+      <div className="mt-12 w-full max-w-6xl">
         <h2 className="text-2xl font-semibold text-gray-800 mb-4">
           Active Shared Forms & Passwords
         </h2>
@@ -196,13 +253,9 @@ const Forms = () => {
                 activeShares.map(sf => (
                   <tr key={sf.id} className="border-b hover:bg-gray-50">
                     <td className="p-3">{sf.form_name}</td>
-                    <td className="p-3 font-mono">{sf.share_password}</td>
-                    <td className="p-3">
-                      {new Date(sf.shared_at).toLocaleString()}
-                    </td>
-                    <td className="p-3">
-                      {sf.users.map(u => u.name).join(", ")}
-                    </td>
+                    <td className="p-3 font-mono">••••••</td>
+                    <td className="p-3">{new Date(sf.shared_at).toLocaleString()}</td>
+                    <td className="p-3">{sf.users.map(u => u.name).join(", ")}</td>
                     <td className="p-3">
                       <button
                         onClick={() => handleDeleteShare(sf.id)}
@@ -220,6 +273,4 @@ const Forms = () => {
       </div>
     </div>
   );
-};
-
-export default Forms;
+}
