@@ -146,18 +146,18 @@ const NewsDashboard = () => {
                   </td>
 
                   <td className="p-3">
-                    {resolveThumb(story.thumbnail) ? (
-                      <img
-                        src={resolveThumb(story.thumbnail)}
-                        alt={story.title}
-                        className="w-14 h-10 object-cover rounded-md"
-                      />
-                    ) : (
-                      <div className="w-14 h-10 bg-gray-200 rounded-md flex items-center justify-center">
-                        <span className="text-gray-400 text-xs">No Image</span>
-                      </div>
-                    )}
-                  </td>
+  {story.thumbnail ? (
+    <img
+      src={story.thumbnail}
+      alt={story.title}
+      className="w-14 h-10 object-cover rounded-md"
+    />
+  ) : (
+    <div className="w-14 h-10 bg-gray-200 rounded-md flex items-center justify-center">
+      <span className="text-gray-400 text-xs">No Image</span>
+    </div>
+  )}
+</td>
 
                   <td className="p-3 font-medium text-gray-700">{story.title}</td>
                   <td className="p-3 text-gray-600">{story.category}</td>
