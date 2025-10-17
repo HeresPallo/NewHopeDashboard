@@ -7,6 +7,8 @@ import { useNavigate } from "react-router-dom";
 import Papa from "papaparse";
 import * as XLSX from "xlsx";
 
+const API_BASE = "https://new-hope-8796c77630ff.herokuapp.com";
+
 const AddDelegateForm = () => {
   const navigate = useNavigate();
   const formRef = useRef();
@@ -17,20 +19,28 @@ const AddDelegateForm = () => {
   const [picture, setPicture] = useState(null);
   const [preview, setPreview] = useState(null);
 
-  // NEW: CSV‑paste state
+  // NEW: CSV-paste state
   const [csvText, setCsvText] = useState("");
+
+  // Axios with auth (if your dashboard is protected)
+  const api = axios.create({ baseURL: API_BASE });
+  api.interceptors.request.use((config) => {
+    const token = localStorage.getItem("token");
+    if (token) config.headers.Authorization = `Bearer ${token}`;
+    return config;
+  });
 
   // Fetch Organ Names
   useEffect(() => {
-    axios
-      .get("https://new-hope-e46616a5d911.herokuapp.com/delegateorgans")
-      .then((r) => setOrgans(r.data))
+    api
+      .get("/delegateorgans")
+      .then((r) => setOrgans(Array.isArray(r.data) ? r.data : []))
       .catch((e) => console.error("Error fetching organs:", e));
   }, []);
 
   // File upload handler (CSV or XLSX)
   const handleFileUpload = (e) => {
-    const file = e.target.files[0];
+    const file = e.target.files?.[0];
     if (!file) return;
     const ext = file.name.split(".").pop().toLowerCase();
 
@@ -38,7 +48,7 @@ const AddDelegateForm = () => {
       Papa.parse(file, {
         header: true,
         skipEmptyLines: true,
-        complete: (res) => setDelegates(res.data),
+        complete: (res) => setDelegates(res.data || []),
         error: (err) => console.error("CSV parse error:", err),
       });
     } else if (["xlsx", "xls"].includes(ext)) {
@@ -54,7 +64,7 @@ const AddDelegateForm = () => {
     }
   };
 
-  // NEW: Paste‑CSV handler
+  // NEW: Paste-CSV handler
   const handlePasteCSV = () => {
     if (!csvText.trim()) {
       alert("Please paste some CSV text first.");
@@ -63,7 +73,7 @@ const AddDelegateForm = () => {
     Papa.parse(csvText, {
       header: true,
       skipEmptyLines: true,
-      complete: (res) => setDelegates(res.data),
+      complete: (res) => setDelegates(res.data || []),
       error: (err) => console.error("CSV parse error:", err),
     });
   };
@@ -75,21 +85,19 @@ const AddDelegateForm = () => {
       return;
     }
     try {
-      await axios.post(
-        "https://new-hope-e46616a5d911.herokuapp.com/delegates/bulk",
-        { delegates }
-      );
+      await api.post("/delegates/bulk", { delegates });
       setSuccessMessage("Bulk upload successful!");
+      setErrorMessage(null);
       setDelegates([]);
       setCsvText("");
     } catch (err) {
-      setErrorMessage(err.response?.data?.error || "Bulk upload failed.");
+      setErrorMessage(err?.response?.data?.error || "Bulk upload failed.");
     }
   };
 
   // Single image upload preview
   const handleFileChange = (e) => {
-    const file = e.target.files[0];
+    const file = e.target.files?.[0];
     if (!file) return;
     if (!["image/png", "image/jpeg"].includes(file.type)) {
       alert("Only JPEG/PNG allowed");
@@ -101,14 +109,14 @@ const AddDelegateForm = () => {
     reader.readAsDataURL(file);
   };
 
-  // Zod schema & React‑Hook‑Form
+  // Zod schema & React-Hook-Form
   const schema = z.object({
     name: z.string().min(3),
     role: z.string().min(2),
-    phonenumber: z.string().min(9),
+    phonenumber: z.string().min(6),
     email: z.string().email(),
     address: z.string().min(3),
-    constituency: z.string().min(3),
+    constituency: z.string().min(1),
     supportstatus: z.enum(["supports", "opposes", "neutral"]),
     organname: z.string().min(1),
   });
@@ -117,7 +125,6 @@ const AddDelegateForm = () => {
     register,
     handleSubmit,
     formState: { errors },
-    setValue,
   } = useForm({
     resolver: zodResolver(schema),
     defaultValues: {
@@ -139,16 +146,14 @@ const AddDelegateForm = () => {
     if (picture) data.append("profilepic", picture);
 
     try {
-      await axios.post(
-        "https://new-hope-e46616a5d911.herokuapp.com/delegates",
-        data,
-        { headers: { "Content-Type": "multipart/form-data" } }
-      );
+      await api.post("/delegates", data, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
       setSuccessMessage("Delegate added!");
       setErrorMessage(null);
       setTimeout(() => navigate("/delegateorgans"), 800);
     } catch (err) {
-      setErrorMessage(err.response?.data?.error || "Error adding delegate");
+      setErrorMessage(err?.response?.data?.error || "Error adding delegate");
     }
   };
 
@@ -157,7 +162,7 @@ const AddDelegateForm = () => {
       <div className="w-full max-w-3xl">
         <h2 className="text-4xl font-bold mb-6 text-center">Add Delegate</h2>
 
-        {/* ——— New: Paste CSV Section ——— */}
+        {/* ——— Paste CSV Section ——— */}
         <div className="mb-6">
           <label className="block mb-2 font-semibold">Paste CSV rows here:</label>
           <textarea
@@ -224,23 +229,17 @@ const AddDelegateForm = () => {
 
         {/* ——— Single Delegate Form ——— */}
         <div className="bg-gray-100 p-8 rounded shadow">
-          <form ref={formRef} onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
             {/* Name & Role */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <label className="block mb-1">Name</label>
-                <input
-                  {...register("name")}
-                  className="w-full p-3 border rounded"
-                />
+                <input {...register("name")} className="w-full p-3 border rounded" />
                 {errors.name && <p className="text-red-600">{errors.name.message}</p>}
               </div>
               <div>
                 <label className="block mb-1">Role</label>
-                <input
-                  {...register("role")}
-                  className="w-full p-3 border rounded"
-                />
+                <input {...register("role")} className="w-full p-3 border rounded" />
                 {errors.role && <p className="text-red-600">{errors.role.message}</p>}
               </div>
             </div>
@@ -267,13 +266,25 @@ const AddDelegateForm = () => {
               <input {...register("constituency")} className="w-full p-3 border rounded" />
             </div>
 
+            {/* Support status */}
+            <div>
+              <label className="block mb-1">Support Status</label>
+              <select {...register("supportstatus")} className="w-full p-3 border rounded">
+                <option value="supports">supports</option>
+                <option value="neutral">neutral</option>
+                <option value="opposes">opposes</option>
+              </select>
+            </div>
+
             {/* Organ */}
             <div>
               <label className="block mb-1">Organ Name</label>
               <select {...register("organname")} className="w-full p-3 border rounded">
                 <option value="">Select an Organ</option>
                 {organs.map((o) => (
-                  <option key={o.id} value={o.organname}>{o.organname}</option>
+                  <option key={o.id} value={o.organname}>
+                    {o.organname}
+                  </option>
                 ))}
               </select>
             </div>
@@ -287,7 +298,7 @@ const AddDelegateForm = () => {
                 onChange={handleFileChange}
                 className="w-full p-2 border rounded"
               />
-              {preview && <img src={preview} className="w-24 h-24 rounded-full mt-2" />}
+              {preview && <img src={preview} className="w-24 h-24 rounded-full mt-2" alt="preview" />}
             </div>
 
             {/* Submit */}
