@@ -35,6 +35,7 @@ import RegistrationRejectionForm from './Forms/RegistrationRejectionForm';
 import DataHubDashboard from './Data Hub/DataHub';
 import CreateForm from './Forms/CreateForm';
 import VisionEditor from './Vision/VisionEditor';
+import VolunteerDashboard from './Volunteer/VolunteerDashboard';
 
 const AllRouting = () => {
     const [isAuthenticated, setIsAuthenticated] = useState(!!localStorage.getItem("token"));
@@ -91,6 +92,7 @@ const AllRouting = () => {
                             <Route path="/forms/rrf" element={<RegistrationRejectionForm/>} />
                             <Route path="/datahub" element={<DataHubDashboard/>} />
                              <Route path="/vision" element={<VisionEditor/>} />
+                             <Route path="/volunteer" element={<VolunteerDashboard/>} />
                         </>
                     ) : (
                         <Route path="*" element={<Navigate to="/login" />} />
