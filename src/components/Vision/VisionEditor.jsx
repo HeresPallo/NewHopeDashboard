@@ -80,27 +80,34 @@ export default function VisionEditor() {
   };
 
   const onSave = async () => {
-    try {
-      setSaving(true);
-      const form = new FormData();
-      if (title.trim()) form.append("title", title.trim());
-      form.append("body", toBodyJSON(intro, groups));
-      form.append("updated_by", "admin"); // TODO: inject real user if you have auth user
-      if (imageFile) form.append("image", imageFile);
+  try {
+    setSaving(true);
+    const form = new FormData();
+    if (title.trim()) form.append("title", title.trim());
+    if (body.trim()) form.append("body", body.trim());
+    form.append("updated_by", "admin");
+    if (imageFile) form.append("image", imageFile);
 
-      const res = await axios.put(`${API}/vision`, form, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
+    const token = localStorage.getItem("token"); // <<— make sure you’re logged in
 
-      if (res.data?.record?.image_url) setImageUrl(res.data.record.image_url);
-      alert("Saved.");
-    } catch (e) {
-      console.error("Vision save:", e);
-      alert("Save failed.");
-    } finally {
-      setSaving(false);
-    }
-  };
+    const res = await axios.put(`${API}/vision`, form, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+        Authorization: `Bearer ${token}`,     // <<— send JWT
+      },
+      withCredentials: true, // optional; fine to keep if you’re also using cookies
+    });
+
+    setImageUrl(res.data.record?.image_url || imageUrl);
+    alert("Saved.");
+  } catch (e) {
+    console.error("Vision save:", e);
+    alert(e?.response?.data?.error || "Save failed.");
+  } finally {
+    setSaving(false);
+  }
+};
+
 
   const previewData = useMemo(() => ({ title, imageUrl, intro, groups }), [title, imageUrl, intro, groups]);
 
